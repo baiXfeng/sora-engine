@@ -43,7 +43,6 @@ protected:
 class Action;
 class BaseActionExecuter;
 class Widget : public WidgetSignal, public GamePadListener, public Event::Listener {
-    friend class Game;
 public:
     typedef std::shared_ptr<Widget> WidgetPtr;
     typedef std::vector<WidgetPtr> WidgetArray;
@@ -383,16 +382,14 @@ public:
         this->pop();
         this->template push<T>(args...);
     }
-public:
-    void update(float delta);
+    void update(float delta) override;
     void render(SDL_Renderer* renderer);
-public:
-    Vector2f const& screen_size() const;
 public:
     int scene_size() const;
     WidgetPtr& scene_at(int index) const;
     WidgetPtr& scene_back() const;
     WidgetPtr find(std::string const& name) const;
+    Vector2f const& size() const;
 public:
     bool hasAction(std::string const& name) const;
     void runAction(ActionPtr const& action);
@@ -422,13 +419,26 @@ private:
     std::string _s;
 };
 
-class FrameAnimationWidget : public ImageWidget {
+class FrameImageWidget : public ImageWidget {
+public:
+    typedef std::vector<TexturePtr> FrameArray;
+public:
+    FrameImageWidget();
+public:
+    FrameArray const& frames() const;
+    void setFrames(FrameArray const& frames);
+    void setFrameIndex(uint32_t index);
+protected:
+    int _index;
+    FrameArray _frames;
+};
+
+class FrameAnimationWidget : public FrameImageWidget {
 public:
     typedef std::vector<TexturePtr> FrameArray;
 public:
     FrameAnimationWidget();
 public:
-    void setFrames(FrameArray const& frames);
     void play(float duration, bool loop = true);
     void play_once(float duration);
     void stop();
@@ -437,10 +447,8 @@ private:
     void onAnimate(float delta);
 private:
     bool _loop;
-    int _index;
     float _frame_tick;
     float _frame_time;
-    FrameArray _frames;
 };
 
 mge_end

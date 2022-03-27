@@ -3,13 +3,13 @@
 //
 
 #include "layout-reader.h"
-#include "file-reader.h"
 #include "loader-pool.h"
 #include "node-loader.h"
 #include "layout-info.h"
 #include "layout-variable-assigner.h"
 #include "private/layout-document.h"
 #include "common/widget.h"
+#include "common/file-reader.h"
 #include <assert.h>
 
 namespace ui {
@@ -60,6 +60,10 @@ namespace ui {
 
     LayoutReader::Node LayoutReader::readNode(mge::Widget* parent, Document* d, bool owner) {
         auto& doc = *d;
+        if (strcmp(doc().name(), "WidgetParam") == 0) {
+            // 不处理参数列表
+            return nullptr;
+        }
         auto loader = _loader->getLoader(doc().name());
         if (loader == nullptr) {
             printf("LayoutReader::readNode fail: <%s> is not exist.\n", doc().name());
@@ -86,8 +90,9 @@ namespace ui {
         this->parseProperties(loader, node.get(), parent, d);
         for (auto iter = doc().begin(); iter != doc().end(); iter++) {
             Document doc(*iter);
-            auto child = readNode(node.get(), &doc);
-            node->addChild(child);
+            if (auto child = readNode(node.get(), &doc); child != nullptr) {
+                node->addChild(child);
+            }
         }
 
         // 完成通知
@@ -101,7 +106,25 @@ namespace ui {
     void LayoutReader::parseProperties(NodeLoader* loader, mge::Widget* node, mge::Widget* parent, Document* d) {
         auto& doc = *d;
         auto owner = this->owner();
+
+        if (loader->hasParamList()) {
+            // 处理参数列表
+            loader->onParamReceiveBegin(node, parent, this);
+            std::map<std::string, std::string> params;
+            for (auto iter = doc().begin(); iter != doc().end(); iter++) {
+                Document doc(*iter);
+                if (strcmp(doc().name(), "WidgetParam") == 0) {
+                    for (auto attr = doc().first_attribute(); not attr.empty(); attr = attr.next_attribute()) {
+                        params.emplace(std::make_pair(attr.name(), attr.value()));
+                    }
+                    loader->onParamReceive(node, parent, this, params);
+                    params.clear();
+                }
+            }
+            loader->onParamReceiveEnd(node, parent, this);
+        }
         for (auto attr = doc().first_attribute(); not attr.empty(); attr = attr.next_attribute()) {
+            // 成员绑定
             if (strcmp(attr.name(), "Assign") == 0 and owner != node) {
                 auto target = owner->to<LayoutVariableAssigner>();
                 if (target) {
@@ -111,10 +134,6 @@ namespace ui {
             }
             loader->onParseProperty(node, parent, this, attr.name(), attr.value());
         }
-    }
-
-    void LayoutReader::assignMember(mge::Widget* target, const char* name, mge::Widget* node) {
-
     }
 
     LayoutInfo const& LayoutReader::info() const {

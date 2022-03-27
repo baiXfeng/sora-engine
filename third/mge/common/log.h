@@ -27,17 +27,6 @@ namespace LOG {
 #define LOG_FINI() {    \
     debugNetFinish();   \
 }
-#elif defined(__PSP__)
-#include <pspdebug.h>
-
-#define LOG_INIT() {    \
-    pspDebugScreenInit(); \
-}
-#define LOG(format, args...) { \
-    pspDebugScreenSetTextColor(0xFFFFFFFF); \
-    pspDebugScreenPrintf(format, ##args);   \
-}
-#define LOG_FINI()
 #else
 #define LOG_INIT()
 #define LOG(format, args...) printf(format, ##args)

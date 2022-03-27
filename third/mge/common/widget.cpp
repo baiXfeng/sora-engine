@@ -78,7 +78,7 @@ _scale({1.0f, 1.0f}),
 _opacity(255) {
     _children.reserve(10);
     ++_widgetCount;
-    setSize(_game.delegate()->screenSize().to<float>());
+    setSize(_game.delegate()->displaySize().to<float>());
     _global_size = _size;
 }
 
@@ -236,7 +236,7 @@ void Widget::update(float delta) {
     if (_children.empty()) {
         return;
     }
-    auto list = _children;
+    WidgetArray list(_children);
     for (auto child : list) {
         if (child->parent() == nullptr) {
             // child is removed, but KeepAlive.
@@ -1044,7 +1044,7 @@ void CurtainWidget::moveMaskVertical(MaskWidget* target, float yStep, float dura
 
 ScreenWidget::ScreenWidget():_curtain(nullptr), _root(nullptr) {
 
-    Widget::Ptr box(new WindowWidget);
+    Widget::Ptr box(new RenderTargetWidget);
     Widget::Ptr window(new WindowWidget);
     Widget::Ptr curtain(new CurtainWidget);
 
@@ -1104,7 +1104,7 @@ void ScreenWidget::update(float delta) {
 }
 
 void ScreenWidget::render(SDL_Renderer* renderer) {
-    WindowWidget::draw(renderer);
+    draw(renderer);
 }
 
 int ScreenWidget::scene_size() const {
@@ -1128,6 +1128,10 @@ Widget::Ptr ScreenWidget::find(std::string const& name) const {
     return nullptr;
 }
 
+Vector2f const& ScreenWidget::size() const {
+    return WindowWidget::size();
+}
+
 bool ScreenWidget::hasAction(std::string const& name) const {
     return WindowWidget::hasAction(name);
 }
@@ -1142,10 +1146,6 @@ void ScreenWidget::stopAction(Action::Ptr const& action) {
 
 void ScreenWidget::stopAction(std::string const& name) {
     WindowWidget::stopAction(name);
-}
-
-Vector2f const& ScreenWidget::screen_size() const {
-    return size();
 }
 
 //=====================================================================================
@@ -1189,20 +1189,35 @@ std::string const& TTFLabel::str() const {
 
 //=====================================================================================
 
-FrameAnimationWidget::FrameAnimationWidget():
-ImageWidget(nullptr),
-_index(0),
-_frame_tick(0.0f),
-_frame_time(0.0f),
-_loop(false) {
-    enableUpdate(true);
+FrameImageWidget::FrameImageWidget():_index(0) {
+
 }
 
-void FrameAnimationWidget::setFrames(FrameArray const& frames) {
+FrameImageWidget::FrameArray const& FrameImageWidget::frames() const {
+    return _frames;
+}
+
+void FrameImageWidget::setFrames(FrameArray const& frames) {
     _frames = frames;
     if (_frames.size()) {
         setTexture(_frames[0]);
     }
+}
+
+void FrameImageWidget::setFrameIndex(uint32_t index) {
+    if (index < _frames.size()) {
+        _index = index;
+        setTexture(_frames[_index]);
+    }
+}
+
+//=====================================================================================
+
+FrameAnimationWidget::FrameAnimationWidget():
+_frame_tick(0.0f),
+_frame_time(0.0f),
+_loop(false) {
+    enableUpdate(true);
 }
 
 void FrameAnimationWidget::play(float duration, bool loop) {

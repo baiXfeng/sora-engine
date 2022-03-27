@@ -135,21 +135,21 @@ void Mouse::onFingerEvent(SDL_Event const& event) {
     switch (event.type) {
         case SDL_FINGERDOWN:
         {
-            auto& size = _game.screen().screen_size();
+            auto& size = _game.screen().size();
             auto scale = Vector2f{event.tfinger.x, event.tfinger.y};
             onFingerDown((size * scale).to<int>());
         }
             break;
         case SDL_FINGERUP:
         {
-            auto& size = _game.screen().screen_size();
+            auto& size = _game.screen().size();
             auto scale = Vector2f{event.tfinger.x, event.tfinger.y};
             onFingerUp((size * scale).to<int>());
         }
             break;
         case SDL_FINGERMOTION:
         {
-            auto& size = _game.screen().screen_size();
+            auto& size = _game.screen().size();
             auto scale = Vector2f{event.tfinger.x, event.tfinger.y};
             onFingerMotion((size * scale).to<int>());
         }

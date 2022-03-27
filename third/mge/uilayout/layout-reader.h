@@ -10,14 +10,15 @@
 
 namespace mge {
     class Widget;
+    class FileReader;
 }
 
 namespace ui {
     class Document;
-    class FileReader;
     class LoaderPool;
     class NodeLoader;
     class LayoutInfo;
+    using FileReader = mge::FileReader;
     class LayoutReader {
         typedef std::shared_ptr<mge::Widget> Node;
         typedef std::shared_ptr<LayoutInfo> Info;
@@ -36,7 +37,6 @@ namespace ui {
     private:
         Node readNode(mge::Widget* parent, Document* d, bool owner = false);
         void parseProperties(NodeLoader* loader, mge::Widget* node, mge::Widget* parent, Document* d);
-        void assignMember(mge::Widget* target, const char* name, mge::Widget* node);
     private:
         LoaderPool* _loader;
         FileReader* _fileReader;

@@ -19,13 +19,21 @@ mge_begin
 class Action;
 class Game : public GameVariable {
 public:
+    enum _ScreenFillMode {
+        STRETCHING = 0,
+        FIT,
+    };
     class Delegate {
         friend class Game;
     public:
         virtual ~Delegate() {}
     public:
         virtual std::string windowTitle() = 0;
-        virtual Vector2i screenSize() = 0;
+        virtual Vector2i windowSize() = 0;
+        virtual Vector2i displaySize() = 0;
+        virtual _ScreenFillMode screenFillMode() const {
+            return STRETCHING;
+        }
     protected:
         virtual void init() = 0;
         virtual void fini() = 0;
@@ -34,14 +42,19 @@ public:
     };
     class App : public Game::Delegate {
     public:
+        typedef _ScreenFillMode ScreenFillMode;
+    public:
         App();
         int run();
     protected:
         std::string windowTitle() override {
             return "my_game";
         }
-        Vector2i screenSize() override {
+        Vector2i displaySize() override {
             return {GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT};
+        }
+        Vector2i windowSize() override {
+            return displaySize();
         }
         void init() override {}
         void fini() override {}

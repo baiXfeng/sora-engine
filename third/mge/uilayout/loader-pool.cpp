@@ -17,6 +17,8 @@ namespace ui {
         addLoader<MaskWidgetLoader>("MaskWidget");
         addLoader<ProgressBarWidgetLoader>("ProgressBarWidget");
         addLoader<RenderTargetWidgetLoader>("RenderTargetWidget");
+        addLoader<FrameImageWidgetLoader>("FrameImageWidget");
+        addLoader<FrameAnimationWidgetLoader>("FrameAnimationWidget");
     }
 
     void LoaderPool::addLoader(std::string const& className, Loader const& loader) {

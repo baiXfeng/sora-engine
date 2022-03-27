@@ -109,9 +109,9 @@ if (PSV)
 		list(APPEND VPKFILES "${ITEM}")
 	ENDFOREACH()
 
-	set(VITA_APP_NAME "Vita 扫雷")
-	set(VITA_TITLEID  "VITAMINE0") #目录名必须9个字符
-	set(VITA_VERSION  "01.02")
+	set(VITA_APP_NAME "Sora-Engine")
+	set(VITA_TITLEID  "SORAGAME0") #目录名必须9个字符
+	set(VITA_VERSION  "01.00")
 
 	vita_create_self(${PROJECT_NAME}.self ${PROJECT_ELF})
 	vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} ${PROJECT_NAME}.self
@@ -153,15 +153,65 @@ elseif(NINTENDO_SWITCH)
 	)
 	file(COPY assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/romfs)
 	nx_generate_nacp(${PROJECT_NAME}.nacp
-			NAME "Vita 扫雷"
+			NAME "Sora-Engine"
 			AUTHOR "BAIFENG"
-			VERSION "1.0.1"
+			VERSION "1.0.0"
 	)
 	nx_create_nro(${PROJECT_NAME}
 			NACP ${PROJECT_NAME}.nacp
 			ICON ${PROJECT_SOURCE_DIR}/platform/switch/icon.jpg
 			ROMFS ${CMAKE_CURRENT_BINARY_DIR}/romfs
 	)
+elseif (PLATFORM_PSP)
+	include_directories($ENV{PSPDEV}/psp/include/SDL2)
+	add_definitions(-DLUA_C89_NUMBERS)
+	add_executable(${PROJECT_ELF} ${BASIC_SOURCE})
+	set(BUILD_PRX ON)
+	set(ENC_PRX ON)
+	target_link_libraries(${PROJECT_ELF} PRIVATE
+			SDL2_image
+			SDL2_mixer
+			SDL2main
+			SDL2
+			SDL2_ttf
+			SDL2_gfx
+			stdc++
+			freetype
+			jpeg
+			vorbisfile
+			vorbis
+			vorbisenc
+			mikmod
+			ogg
+			png
+			m
+			z
+			GL
+			pspgu
+			pspge
+			pspvram
+			pspvfpu
+			pspdisplay
+			pspaudio
+			psphprm
+			pspdebug
+			pspctrl
+			pspgdb
+			pspgdb_user
+			psphprm
+			psphprm_driver
+			#${PSP_LIBRARIES}
+			)
+	create_pbp_file(
+			TARGET ${PROJECT_ELF}
+			ICON_PATH ICON0.PNG
+			BACKGROUND_PATH NULL
+			PREVIEW_PATH NULL
+			TITLE ${PROJECT_NAME}
+	)
+	file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/assets)
+	file(COPY platform/psp/ICON0.PNG DESTINATION ${CMAKE_BINARY_DIR})
+	file(COPY assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 else()
 	add_executable(${PROJECT_NAME} ${BASIC_SOURCE})
 	file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/assets)

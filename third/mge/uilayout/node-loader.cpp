@@ -30,7 +30,7 @@ namespace ui {
             pystring::split(value, ret, ",");
             if (ret.size() == 2) {
                 float x = 0.0f, y = 0.0f;
-                auto screen_size = _game.screen().screen_size();
+                auto screen_size = _game.screen().size();
                 if (ret[0].back() == '%') {
                     x = (atof(ret[0].c_str()) / 100.0f) * (parent ? parent->size().x * parent->scale().x : screen_size.x);
                 } else {
@@ -48,7 +48,7 @@ namespace ui {
             pystring::split(value, ret, ",");
             if (ret.size() == 2) {
                 float x = 0.0f, y = 0.0f;
-                auto screen_size = _game.screen().screen_size();
+                auto screen_size = _game.screen().size();
                 if (ret[0].back() == '%') {
                     x = (atof(ret[0].c_str()) / 100.0f) * (parent ? parent->size().x : screen_size.x);
                 } else {
@@ -83,6 +83,8 @@ namespace ui {
             node->setVisible(strcmp(value, "true") == 0);
         } else if (strcmp(name, "Clip") == 0) {
             node->enableClip(strcmp(value, "true") == 0);
+        } else if (strcmp(name, "EnableUpdate") == 0) {
+            node->enableUpdate(strcmp(value, "true") == 0);
         }
     }
 
@@ -213,5 +215,53 @@ namespace ui {
 
     Node RenderTargetWidgetLoader::createNode(mge::Widget* parent, LayoutReader* reader) {
         return Node(new mge::RenderTargetWidget);
+    }
+
+    Node FrameImageWidgetLoader::createNode(mge::Widget* parent, LayoutReader* reader) {
+        return Node(new mge::FrameImageWidget);
+    }
+
+    bool FrameImageWidgetLoader::hasParamList() const {
+        return true;
+    }
+
+    void FrameImageWidgetLoader::onParamReceiveBegin(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {
+        _frames.clear();
+    }
+
+    void FrameImageWidgetLoader::onParamReceive(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, Params const& params) {
+        if (auto iter = params.find("Source"); iter != params.end()) {
+            if (auto texture = res::load_texture(iter->second); texture != nullptr) {
+                _frames.emplace_back( res::load_texture(iter->second) );
+            }
+        }
+    }
+
+    void FrameImageWidgetLoader::onParamReceiveEnd(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {
+        node->fast_to<FrameImageWidget>()->setFrames(_frames);
+    }
+
+    Node FrameAnimationWidgetLoader::createNode(mge::Widget* parent, LayoutReader* reader) {
+        return Node(new mge::FrameAnimationWidget);
+    }
+
+    bool FrameAnimationWidgetLoader::hasParamList() const {
+        return true;
+    }
+
+    void FrameAnimationWidgetLoader::onParamReceiveBegin(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {
+        _frames.clear();
+    }
+
+    void FrameAnimationWidgetLoader::onParamReceive(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, Params const& params) {
+        if (auto iter = params.find("Source"); iter != params.end()) {
+            if (auto texture = res::load_texture(iter->second); texture != nullptr) {
+                _frames.emplace_back( res::load_texture(iter->second) );
+            }
+        }
+    }
+
+    void FrameAnimationWidgetLoader::onParamReceiveEnd(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {
+        node->fast_to<FrameAnimationWidget>()->setFrames(_frames);
     }
 }
