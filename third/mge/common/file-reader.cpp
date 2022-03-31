@@ -13,6 +13,10 @@ FileData::FileData(uint32_t size):_buffer(nullptr), _size(0) {
     resize(size);
 }
 
+FileData::FileData():_buffer(nullptr), _size(0) {
+
+}
+
 FileData::~FileData() {
     free();
     _name.clear();
@@ -36,9 +40,11 @@ bool FileData::empty() const {
 
 void FileData::resize(uint32_t size) {
     free();
-    _size = size;
-    _buffer = (unsigned char*)malloc(size);
-    memset(_buffer, 0, size);
+    if (size != 0) {
+        _size = size;
+        _buffer = (unsigned char*)malloc(size);
+        memset(_buffer, 0, size);
+    }
 }
 
 void FileData::free() {
@@ -54,7 +60,7 @@ class SimpleFileReader : public FileReader {
         auto filename = mge::res::getAssetsPath() + name;
         FILE* fp = fopen(filename.c_str(), "rb");
         if (fp == NULL) {
-            return Data();
+            return Data(new FileData);
         }
 
         fseek(fp, 0, SEEK_END);
@@ -78,7 +84,7 @@ class PSP_FileReader : public FileReader {
     Data getData(std::string const& name) override {
         auto handle = sceIoOpen(name.c_str(), PSP_O_RDONLY, 0777);
         if (handle <= 0) {
-            return Data();
+            return Data(new FileData);
         }
 
         sceIoLseek(handle, 0, PSP_SEEK_END);

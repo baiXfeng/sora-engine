@@ -11,6 +11,7 @@ namespace LOG {
         info,
         error,
         debug,
+        all,
     };
 }
 
@@ -28,12 +29,21 @@ namespace LOG {
     debugNetFinish();   \
 }
 #else
-#define LOG_INIT()
+#define LOG_INIT() (0)
 #define LOG(format, args...) printf(format, ##args)
-#define LOG_FINI()
+#define LOG_FINI() (0)
 #endif
 
+#define LOG_INFO(format, args...) LOG(format, ##args)
+#define LOG_ERROR(format, args...) LOG(format, ##args)
+#define LOG_DEBUG(format, args...) LOG(format, ##args)
+
 #define ENABLE_LOG false
+
+#if defined(__APPLE__)
+#undef ENABLE_LOG
+#define ENABLE_LOG true
+#endif
 
 #if not ENABLE_LOG
 #undef LOG_INIT

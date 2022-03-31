@@ -17,6 +17,7 @@ class FileData final {
     friend class FileReader;
 public:
     FileData(uint32_t size);
+    FileData();
     ~FileData();
 public:
     unsigned char* data() const;
