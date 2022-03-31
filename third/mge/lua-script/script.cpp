@@ -39,8 +39,9 @@ namespace Lua {
         if (ret != 0) {
             LOG_ERROR("error: %s\n", lua_tostring(L, -1));
         } else {
-            lutok3::State state(L);
-            state.pcall();
+            if (auto ret = lua_pcall(L, 0, 0, 0); ret != 0) {
+                LOG_ERROR("error: %s\n", lua_tostring(L, -1));
+            }
             for (int i = 0; i < OBJECT_FUNCTION_MAX; ++i) {
                 lua_getglobal(L, ObjectFunctionNames[i]);
                 if (not lua_isnil(L, -1)) {
@@ -57,7 +58,6 @@ namespace Lua {
                 }
             }
         }
-
         assert(top == lua_gettop(L));
     }
 
@@ -70,10 +70,9 @@ namespace Lua {
     }
 
     ELuna::LuaFunction<void> ObjectScript::getFunction(ObjectFunction i) {
-        if (i <= -1 or i >= OBJECT_FUNCTION_MAX) {
-            LOG_ERROR("error: object function index overstep.");
-        }
-        if (funcRef[i] == LUA_NOREF) {
+        if (i < OBJECT_FUNCTION_INIT or i >= OBJECT_FUNCTION_MAX) {
+            LOG_ERROR("error: object function index [%d] overstep.", i);
+        } else if (funcRef[i] == LUA_NOREF) {
             LOG_ERROR("error: object function %s noref.", ObjectFunctionNames[i]);
         }
         return ELuna::LuaFunction<void>(L, funcRef[i]);
