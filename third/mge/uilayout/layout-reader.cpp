@@ -10,6 +10,7 @@
 #include "private/layout-document.h"
 #include "common/widget.h"
 #include "common/file-reader.h"
+#include "common/log.h"
 #include <assert.h>
 
 namespace ui {
@@ -33,12 +34,18 @@ namespace ui {
     LayoutReader::Node LayoutReader::readNode(std::string const& fileName, mge::Widget* parent) {
         pugi::xml_document xml;
         auto d = _fileReader->getData(fileName);
-        assert(not d->empty() && "Reader::readNode fail<1>.");
+        if (d->empty()) {
+            LOG_ERROR("LayoutReader::readNode <%s> not exist.\n", fileName.c_str());
+            return Node();
+        }
         xml.load_buffer(d->data(), d->size());
 
         Document doc(xml.first_child());
         _info.push_back(Info(new LayoutInfo(&doc)));
-        assert(strcmp(doc().name(), "Layout") == 0 && "Reader::readNode fail<2>.");
+        if (strcmp(doc().name(), "Layout") != 0) {
+            LOG_ERROR("LayoutReader::readNode <%s> first child is not 'Layout'.\n", fileName.c_str());
+            return Node();
+        }
 
         if (info().RootWidgetName.empty()) {
             // 未指派根视图名字
