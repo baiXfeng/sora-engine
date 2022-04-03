@@ -137,6 +137,10 @@ namespace lutok3 {
         State(lua_State * luaState);
         ~State();
 
+        lua_State* operator()() {
+            return state;
+        }
+
         void openLibs();
 
         void loadString(const std::string & code);

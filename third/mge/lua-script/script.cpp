@@ -8,26 +8,6 @@
 
 namespace Lua {
 
-    const char* ObjectFunctionNames[OBJECT_FUNCTION_MAX] = {
-            "init",
-            "release",
-            "update",
-            "keydown",
-            "keyup",
-            "touch_began",
-            "touch_moved",
-            "touch_ended",
-    };
-
-    void setObjectFuncAllNil(lua_State* L) {
-        auto const top = lua_gettop(L);
-        for (int i = 0; i < OBJECT_FUNCTION_MAX; ++i) {
-            lua_pushnil(L);
-            lua_setglobal(L, ObjectFunctionNames[i]);
-        }
-        assert(top == lua_gettop(L));
-    }
-
     inline void traceStack(lua_State* L, int n) {
         lua_Debug ar;
         if (lua_getstack(L, n, &ar)) {
@@ -43,7 +23,7 @@ namespace Lua {
         }
     }
 
-    inline int error_log(lua_State *L) {
+    int error_log(lua_State *L) {
         LOG_ERROR("error : %s\n", lua_tostring(L, -1));
         traceStack(L, 0);
         return 0;
@@ -91,7 +71,7 @@ namespace Lua {
     }
 
     ObjectScript::~ObjectScript() {
-        for (int i = 0; i <OBJECT_FUNCTION_MAX; ++i) {
+        for (int i = 0; i < func_refs.size(); ++i) {
             if (func_refs[i] != LUA_NOREF) {
                 luaL_unref(L, LUA_REGISTRYINDEX, func_refs[i]);
             }
@@ -106,20 +86,7 @@ namespace Lua {
         }
     }
 
-    void ObjectScript::Call(ObjectFunction function) {
-        auto const func_ref = func_refs[function];
-        if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
-            return;
-        }
-        auto const top = lua_gettop(L);
-        {
-            lua_pushcclosure(L, error_log, 0);
-            int stackTop = lua_gettop(L);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, this->object_ref);
-            lua_pcall(L, 1, 1, stackTop);
-            lua_settop(L, -3);
-        }
-        assert(top == lua_gettop(L));
+    int ObjectScript::getRef() const {
+        return object_ref;
     }
 }

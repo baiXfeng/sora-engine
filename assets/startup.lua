@@ -1,4 +1,2 @@
 
-import("assets/scripts/test.lua")
-
-print("hello world")
+scene.push("assets/layouts/start.xml")

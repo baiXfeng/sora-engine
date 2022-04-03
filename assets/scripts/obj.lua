@@ -1,12 +1,14 @@
 
 function init(self)
     print("init")
-    self:t0()
     self.a = "a"
     print("a = ", self.a)
     self.test1 = test1
     collectgarbage("collect")
     print("self nil")
+
+    print("scene.push", scene.push)
+    print("global push", push)
 end
 
 local bb = "bb."

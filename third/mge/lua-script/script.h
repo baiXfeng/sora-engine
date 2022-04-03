@@ -15,25 +15,12 @@ namespace mge {
 
 namespace Lua {
 
-    enum ObjectFunction {
-        OBJECT_FUNCTION_INIT = 0,
-        OBJECT_FUNCTION_RELEASE,
-        OBJECT_FUNCTION_UPDATE,
-        OBJECT_FUNCTION_ONKEYDOWN,
-        OBJECT_FUNCTION_ONKEYUP,
-        OBJECT_FUNCTION_ONTOUCHBEGAN,
-        OBJECT_FUNCTION_ONTOUCHMOVED,
-        OBJECT_FUNCTION_ONTOUCHENDED,
-        OBJECT_FUNCTION_MAX,
-    };
-
-    extern const char* ObjectFunctionNames[OBJECT_FUNCTION_MAX];
-
     int error_log(lua_State *L);
 
     class ObjectScript {
     public:
-        ObjectScript(lua_State* L, std::shared_ptr<mge::FileData> const& data);
+        typedef int32_t Function;
+    public:
         ObjectScript(lua_State* L, std::shared_ptr<mge::FileData> const& data, const char* functionNames[], size_t nameSize);
         ~ObjectScript();
     public:
@@ -48,9 +35,25 @@ namespace Lua {
             assert(top == lua_gettop(L));
         }
         void unRef();
-        void Call(ObjectFunction function);
+        int getRef() const;
+        void Call(Function function) {
+            auto const func_ref = func_refs[function];
+            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+                return;
+            }
+            auto const top = lua_gettop(L);
+            {
+                lua_pushcclosure(L, error_log, 0);
+                int stackTop = lua_gettop(L);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, this->object_ref);
+                lua_pcall(L, 1, 1, stackTop);
+                lua_settop(L, -3);
+            }
+            assert(top == lua_gettop(L));
+        }
         template<typename T>
-        void Call(ObjectFunction function, T value) {
+        void Call(Function function, T value) {
             auto const func_ref = func_refs[function];
             if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
                 return;
@@ -68,7 +71,7 @@ namespace Lua {
             assert(top == lua_gettop(L));
         }
         template<typename T1, typename T2>
-        void Call(ObjectFunction function, T1 value1, T2 value2) {
+        void Call(Function function, T1 value1, T2 value2) {
             auto const func_ref = func_refs[function];
             if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
                 return;
