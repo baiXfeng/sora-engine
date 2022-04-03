@@ -1,10 +1,4 @@
 
-function init()
-
-end
-
-function fini()
-
-end
+import("assets/scripts/test.lua")
 
 print("hello world")

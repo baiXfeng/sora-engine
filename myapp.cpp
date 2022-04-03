@@ -11,8 +11,18 @@
 #include "common/xml_layout.h"
 #include "common/file-reader.h"
 #include "lua-script/script.h"
-#include "lutok3.h"
+#include "src/lua_apis.h"
 #include "ELuna.h"
+
+class Test {
+public:
+    void t0() {
+        printf("t0 call.\n");
+    }
+    ~Test() {
+        printf("~Test.\n");
+    }
+};
 
 class MyApp : public mge::Game::App {
     lua_State* _state;
@@ -25,8 +35,9 @@ public:
             LOG("assets/startup.lua not exist.\n");
         } else {
             _state = ELuna::openLua();
+            openSoraLibs(_state);
+            _game.set<lua_State*>("lua_state", _state);
             auto const top = lua_gettop(_state);
-            auto& state = _game.force_get<lutok3::State>("lua_state", _state);
             auto ret = luaL_loadbuffer(_state, (char*)data->data(), (size_t)data->size(), data->name().c_str());
             auto a = lua_gettop(_state);
             if (ret) {
@@ -38,6 +49,19 @@ public:
             }
             auto b = lua_gettop(_state);
             assert(top == lua_gettop(_state));
+        }
+
+        ELuna::registerClass<Test>(_state, "Test", ELuna::constructor<Test>);
+        ELuna::registerMethod<Test>(_state, "t0", &Test::t0);
+
+        Test test;
+        data = _game.uilayout().getFileReader()->getData("assets/scripts/obj.lua");
+        if (!data->empty()) {
+            Lua::ObjectScript script(_state, data, Lua::ObjectFunctionNames, Lua::OBJECT_FUNCTION_MAX);
+            script.Ref(&test);
+            script.Call(Lua::OBJECT_FUNCTION_INIT);
+            script.Call(Lua::OBJECT_FUNCTION_RELEASE);
+            script.Call(Lua::OBJECT_FUNCTION_UPDATE, 1.0f / 60);
         }
     }
     void update(float delta) override {
