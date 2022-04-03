@@ -10,7 +10,6 @@
 #include "common/widget.h"
 #include "common/xml_layout.h"
 #include "common/file-reader.h"
-#include "lua-script/script.h"
 #include "src/lua_apis.h"
 #include "src/lua_objects.h"
 #include "ELuna.h"
@@ -24,7 +23,7 @@ public:
         LOG_INIT();
         auto data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
         if (data->empty()) {
-            LOG("assets/startup.lua not exist.\n");
+            LOG_ERROR("assets/startup.lua not exist.\n");
         } else {
             _state = ELuna::openLua();
             openSoraLibs(_state);

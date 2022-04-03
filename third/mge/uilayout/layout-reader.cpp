@@ -73,7 +73,7 @@ namespace ui {
         }
         auto loader = _loader->getLoader(doc().name());
         if (loader == nullptr) {
-            printf("LayoutReader::readNode fail: <%s> is not exist.\n", doc().name());
+            LOG_ERROR("LayoutReader::readNode: %s's loader is not register.\n", doc().name());
             return nullptr;
         }
         if (strcmp(doc().name(), "XmlLayout") == 0) {

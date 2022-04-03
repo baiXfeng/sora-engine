@@ -17,7 +17,7 @@ namespace ui {
     class LayoutReader;
 }
 
-class Scene : public mge::GamePadWidget, public ui::LayoutNodeListener {
+class Node : public mge::Widget, public mge::FingerResponder, public ui::LayoutVariableAssigner, public ui::LayoutNodeListener {
 public:
     enum Function {
         OBJECT_FUNCTION_INIT = 0,
@@ -33,20 +33,35 @@ public:
     static const char* FunctionNames[OBJECT_FUNCTION_MAX];
     typedef std::shared_ptr<Lua::ObjectScript> LuaScript;
 public:
-    Scene();
-    ~Scene();
+    Node();
+    ~Node();
 public:
-    void test() {}
     void loadScript(std::string const& fileName);
 private:
+    bool onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) override;
     void onLayoutLoaded() override;
+    void update(float delta) override;
+    void onButtonDown(int key) override;
+    void onButtonUp(int key) override;
+    bool onTouchBegen(mge::Vector2i const& point) override;
+    void onTouchMoved(mge::Vector2i const& point) override;
+    void onTouchEnded(mge::Vector2i const& point) override;
 private:
     LuaScript _script;
 };
 
-class SceneLoader : public ui::NodeLoader {
-    UI_NODE_LOADER_CREATE(Scene);
+class NodeLoader : public ui::NodeLoader {
+    UI_NODE_LOADER_CREATE(::Node);
     void onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) override;
+};
+
+class Layer : public Node {
+public:
+    Layer();
+};
+
+class LayerLoader : public NodeLoader {
+    UI_NODE_LOADER_CREATE(Layer);
 };
 
 void registerClass(lua_State* L);

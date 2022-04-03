@@ -70,6 +70,24 @@ namespace Lua {
             }
             assert(top == lua_gettop(L));
         }
+        template<typename RL, typename T>
+        RL CallRet(Function function, T value) {
+            auto const func_ref = func_refs[function];
+            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+                return RL();
+            }
+            auto const top = lua_gettop(L);
+            lua_pushcclosure(L, error_log, 0);
+            int stackTop = lua_gettop(L);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, this->object_ref);
+            ELuna::push2lua(L, value);
+            lua_pcall(L, 2, 1, stackTop);
+            RL result = ELuna::read2cpp<RL>(L, -1);
+            lua_settop(L, -3);
+            assert(top == lua_gettop(L));
+            return result;
+        }
         template<typename T1, typename T2>
         void Call(Function function, T1 value1, T2 value2) {
             auto const func_ref = func_refs[function];
@@ -88,6 +106,9 @@ namespace Lua {
                 lua_settop(L, -3);
             }
             assert(top == lua_gettop(L));
+        }
+        lua_State* State() const {
+            return L;
         }
     protected:
         lua_State* L;

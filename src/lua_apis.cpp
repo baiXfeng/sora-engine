@@ -54,7 +54,8 @@ void openSoraLibs(lua_State* L) {
     registerCFunction2Table(L, "scene", "replace", &replaceScene);
     registerCFunction2Table(L, "scene", "pop", &popScene);
 
-    _game.uilayout().getLoaderPool()->addLoader<SceneLoader>("Scene");
+    _game.uilayout().getLoaderPool()->addLoader<LayerLoader>("Layer");
+    _game.uilayout().getLoaderPool()->addLoader<NodeLoader>("Node");
 
     registerClass(L);
 }
@@ -77,7 +78,7 @@ void import(const char* luaFileName) {
 void pushScene(const char* xmlFileName) {
     auto scene = _game.uilayout().readNode(xmlFileName);
     if (scene == nullptr) {
-        LOG_ERROR("pushScene fail: %s not exist.\n", xmlFileName);
+        LOG_ERROR("pushScene fail: %s node is null.\n", xmlFileName);
         return;
     }
     _game.screen().push(scene);
@@ -86,7 +87,7 @@ void pushScene(const char* xmlFileName) {
 void replaceScene(const char* xmlFileName) {
     auto scene = _game.uilayout().readNode(xmlFileName);
     if (scene == nullptr) {
-        LOG_ERROR("pushScene fail: %s node is null.\n", xmlFileName);
+        LOG_ERROR("replaceScene fail: %s node is null.\n", xmlFileName);
         return;
     }
     _game.screen().replace(scene);

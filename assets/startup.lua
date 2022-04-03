@@ -1,2 +1,2 @@
 
-scene.push("assets/layouts/start.xml")
+scene.push("assets/layouts/title.xml")
