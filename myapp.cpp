@@ -18,28 +18,16 @@
 class MyApp : public mge::Game::App {
     lua_State* _state;
 public:
-    MyApp():_state(0) {}
+    MyApp():_state(ELuna::openLua()) {}
     void init() override {
         LOG_INIT();
         auto data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
         if (data->empty()) {
             LOG_ERROR("assets/startup.lua not exist.\n");
         } else {
-            _state = ELuna::openLua();
             openSoraLibs(_state);
             _game.set<lutok3::State>("lua_state", _state);
-            auto const top = lua_gettop(_state);
-            {
-                auto ret = luaL_loadbuffer(_state, (char*)data->data(), (size_t)data->size(), data->name().c_str());
-                if (ret) {
-                    LOG("error: %s\n", lua_tostring(_state, -1));
-                    lua_pop(_state, 1);
-                } else if (ret = lua_pcall(_state, 0, 0, 0); ret != 0) {
-                    LOG("error: %s\n", lua_tostring(_state, -1));
-                    lua_pop(_state, 1);
-                }
-            }
-            assert(top == lua_gettop(_state));
+            ELuna::doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
         }
     }
     void update(float delta) override {

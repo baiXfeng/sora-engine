@@ -40,6 +40,7 @@ public:
         OBJECT_FUNCTION_UPDATE,
         OBJECT_FUNCTION_ONKEYDOWN,
         OBJECT_FUNCTION_ONKEYUP,
+        OBJECT_FUNCTION_ONJOYSTICK,
         OBJECT_FUNCTION_ONTOUCHBEGAN,
         OBJECT_FUNCTION_ONTOUCHMOVED,
         OBJECT_FUNCTION_ONTOUCHENDED,
@@ -58,6 +59,7 @@ protected:
     void update(float delta) override;
     void onButtonDown(int key) override;
     void onButtonUp(int key) override;
+    void onJoyAxisMotion(JOYIDX joy_id, int x, int y) override;
     bool onTouchBegen(mge::Vector2i const& point) override;
     void onTouchMoved(mge::Vector2i const& point) override;
     void onTouchEnded(mge::Vector2i const& point) override;

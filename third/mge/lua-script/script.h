@@ -49,8 +49,8 @@ namespace Lua {
             {
                 lua_pushcclosure(L, error_log, 0);
                 int stackTop = lua_gettop(L);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, this->object_ref);
+                ELuna::push2lua_ref(L, func_ref);
+                ELuna::push2lua_ref(L, object_ref);
                 lua_pcall(L, 1, 1, stackTop);
                 lua_settop(L, -3);
             }
@@ -69,8 +69,8 @@ namespace Lua {
             {
                 lua_pushcclosure(L, error_log, 0);
                 int stackTop = lua_gettop(L);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, this->object_ref);
+                ELuna::push2lua_ref(L, func_ref);
+                ELuna::push2lua_ref(L, object_ref);
                 ELuna::push2lua(L, value);
                 lua_pcall(L, 2, 1, stackTop);
                 lua_settop(L, -3);
@@ -89,8 +89,8 @@ namespace Lua {
             auto const top = lua_gettop(L);
             lua_pushcclosure(L, error_log, 0);
             int stackTop = lua_gettop(L);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
-            lua_rawgeti(L, LUA_REGISTRYINDEX, this->object_ref);
+            ELuna::push2lua_ref(L, func_ref);
+            ELuna::push2lua_ref(L, object_ref);
             ELuna::push2lua(L, value);
             lua_pcall(L, 2, 1, stackTop);
             RL result = ELuna::read2cpp<RL>(L, -1);
@@ -111,8 +111,8 @@ namespace Lua {
             {
                 lua_pushcclosure(L, error_log, 0);
                 int stackTop = lua_gettop(L);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, this->object_ref);
+                ELuna::push2lua_ref(L, func_ref);
+                ELuna::push2lua_ref(L, object_ref);
                 ELuna::push2lua(L, value1);
                 ELuna::push2lua(L, value2);
                 lua_pcall(L, 3, 1, stackTop);
@@ -135,10 +135,10 @@ namespace Lua {
             {
                 lua_pushcclosure(L, error_log, 0);
                 int stackTop = lua_gettop(L);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, this->object_ref);
+                ELuna::push2lua_ref(L, func_ref);
+                ELuna::push2lua_ref(L, object_ref);
                 ELuna::push2lua(L, name);
-                lua_rawgeti(L, LUA_REGISTRYINDEX, assign_ref);
+                ELuna::push2lua_ref(L, assign_ref);
                 lua_pcall(L, 3, 1, stackTop);
                 lua_settop(L, -3);
             }

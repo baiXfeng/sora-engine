@@ -59,6 +59,7 @@ const char* Node::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "update",
         "key_down",
         "key_up",
+        "joy_stick",
         "touch_began",
         "touch_moved",
         "touch_ended",
@@ -116,6 +117,15 @@ void Node::onButtonDown(int key) {
 void Node::onButtonUp(int key) {
     if (_script != nullptr) {
         _script->Call(OBJECT_FUNCTION_ONKEYUP, key);
+    }
+}
+
+void Node::onJoyAxisMotion(JOYIDX joy_id, int x, int y) {
+    if (_script != nullptr) {
+        ELuna::LuaTable table(_script->State());
+        table.set("x", x);
+        table.set("y", y);
+        _script->Call(OBJECT_FUNCTION_ONJOYSTICK, table);
     }
 }
 

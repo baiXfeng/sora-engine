@@ -55,10 +55,12 @@ namespace ELuna
 	inline void traceStack(lua_State* L, int n);
 	inline int error_log(lua_State *L);
 	inline void doFile(lua_State *L, const char *fileName);
+    inline void doBuffer(lua_State *L, const char* buffer, const size_t size, const char* name);
 	inline lua_State* openLua();
 	inline void closeLua(lua_State* L);
 	template<typename T> inline T read2cpp(lua_State *L, int index);
 	template<typename T> inline void push2lua(lua_State *L, T ret);
+    inline void push2lua_ref(lua_State *L, int ref);
 
 	///////////////////////////////////////////////////////////////////////////////
 	// lua's string type
@@ -417,6 +419,10 @@ namespace ELuna
 	template<> inline void push2lua(lua_State *L, std::string ret) {lua_pushstring(L, ret.c_str());};
 	template<> inline void push2lua(lua_State *L, LuaString ret) {lua_pushlstring(L, ret.str, ret.len);};
 	template<> inline void push2lua(lua_State *L, LuaTable ret) { if(ret.m_refCount) lua_pushvalue(L, ret.m_stackPos); else lua_pushnil(L);};
+
+    inline void push2lua_ref(lua_State *L, int ref) {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    }
 
 	///////////////////////////////////////////////////////////////////////////////
 	// define a proxy class for method and fuction
@@ -1663,6 +1669,24 @@ namespace ELuna
 
 		lua_pop(L, 1);
 	}
+
+    inline void doBuffer(lua_State *L, const char* buffer, const size_t size, const char* name) {
+        auto const top = lua_gettop(L);
+        {
+            lua_pushcclosure(L, error_log, 0);
+            int stackTop = lua_gettop(L);
+            if (luaL_loadbuffer(L, buffer, size, name) == 0) {
+                if (lua_pcall(L, 0, 0, stackTop)) {
+                    lua_pop(L, 1);
+                }
+            } else {
+                printf("dofile error: %s\n", lua_tostring(L, -1));
+                lua_pop(L, 1);
+            }
+            lua_pop(L, 1);
+        }
+        assert(top == lua_gettop(L));
+    }
 
 	inline lua_State* openLua() {
 		lua_State *L = luaL_newstate();
