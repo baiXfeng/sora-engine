@@ -1065,13 +1065,6 @@ namespace ELuna
 	template<typename RL>
 	class LuaFunction {
 	public:
-		~LuaFunction() {
-            if (m_owner) {
-                luaL_unref(m_luaState, LUA_REGISTRYINDEX, m_ref);
-            }
-			m_luaState = NULL;
-		}
-
         LuaFunction(lua_State* L, int ref):m_luaState(L), m_ref(ref), m_owner(false) {
 
         }
@@ -1090,6 +1083,17 @@ namespace ELuna
 				assert(0);
 			}
 		};
+
+        ~LuaFunction() {
+            if (m_owner) {
+                luaL_unref(m_luaState, LUA_REGISTRYINDEX, m_ref);
+            }
+            m_luaState = NULL;
+        }
+
+        bool valid() const {
+            return m_ref != LUA_NOREF;
+        }
 
 		RL operator()() {
 			lua_pushcclosure(m_luaState, error_log, 0);                // stack top +1
@@ -1239,13 +1243,6 @@ namespace ELuna
 	template<>
 	class LuaFunction<LuaTable> {
 	public:
-		~LuaFunction() {
-            if (m_owner) {
-                luaL_unref(m_luaState, LUA_REGISTRYINDEX, m_ref);
-            }
-			m_luaState = NULL;
-		}
-
         LuaFunction(lua_State* L, int ref):m_luaState(L), m_ref(ref), m_owner(false) {
 
         }
@@ -1264,6 +1261,17 @@ namespace ELuna
 				assert(0);
 			}
 		};
+
+        ~LuaFunction() {
+            if (m_owner) {
+                luaL_unref(m_luaState, LUA_REGISTRYINDEX, m_ref);
+            }
+            m_luaState = NULL;
+        }
+
+        bool valid() const {
+            return m_ref != LUA_NOREF;
+        }
 
 		LuaTable operator()() {
 			lua_pushcclosure(m_luaState, error_log, 0);                // stack top +1
@@ -1429,6 +1437,10 @@ namespace ELuna
 			m_luaState = NULL;
 		};
 
+        bool valid() const {
+            return m_ref != LUA_NOREF;
+        }
+
 		void operator()() {
 			lua_pushcclosure(m_luaState, error_log, 0);
 			int stackTop = lua_gettop(m_luaState);
@@ -1553,6 +1565,85 @@ namespace ELuna
 		//const char* m_name;
 		lua_State* m_luaState;
 	};
+
+    template<>  inline LuaFunction<void> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {
+            lua_pushvalue(L, index);
+            return LuaFunction<void>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<void>(L, LUA_NOREF);
+    }
+
+    template<>  inline LuaFunction<LuaTable> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {
+            lua_pushvalue(L, index);
+            return LuaFunction<LuaTable>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<LuaTable>(L, LUA_NOREF);
+    }
+
+    template<>  inline LuaFunction<int> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {
+            lua_pushvalue(L, index);
+            return LuaFunction<int>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<int>(L, LUA_NOREF);
+    }
+
+    template<>  inline LuaFunction<unsigned int> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {
+            lua_pushvalue(L, index);
+            return LuaFunction<unsigned int>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<unsigned int>(L, LUA_NOREF);
+    }
+
+    template<>  inline LuaFunction<lua_Integer> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {
+            lua_pushvalue(L, index);
+            return LuaFunction<lua_Integer>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<lua_Integer>(L, LUA_NOREF);
+    }
+
+    template<>  inline LuaFunction<float> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {
+            lua_pushvalue(L, index);
+            return LuaFunction<float>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<float>(L, LUA_NOREF);
+    }
+
+    template<>  inline LuaFunction<double> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {
+            lua_pushvalue(L, index);
+            return LuaFunction<double>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<double>(L, LUA_NOREF);
+    }
+
+    template<>  inline LuaFunction<char*> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {            lua_pushvalue(L, index);
+            return LuaFunction<char*>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<char*>(L, LUA_NOREF);
+    }
+
+    template<>  inline LuaFunction<const char*> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {
+            lua_pushvalue(L, index);
+            return LuaFunction<const char*>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<const char*>(L, LUA_NOREF);
+    }
+
+    template<>  inline LuaFunction<std::string> read2cpp(lua_State* L, int index) {
+        if (lua_type(L, index) == LUA_TFUNCTION) {
+            lua_pushvalue(L, index);
+            return LuaFunction<std::string>(L, luaL_ref(L, LUA_REGISTRYINDEX), true);
+        }
+        return LuaFunction<std::string>(L, LUA_NOREF);
+    }
 
 	inline void doFile(lua_State *L, const char *fileName) {
 		lua_pushcclosure(L, error_log, 0);
