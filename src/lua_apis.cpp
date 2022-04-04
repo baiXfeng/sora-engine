@@ -54,8 +54,11 @@ void openSoraLibs(lua_State* L) {
     registerCFunction2Table(L, "scene", "replace", &replaceScene);
     registerCFunction2Table(L, "scene", "pop", &popScene);
 
+    _game.uilayout().setLoader(mge::XmlLayout::LoaderPool(new ui::LoaderPool));
+    _game.uilayout().getLoaderPool()->addLoader<ui::WidgetLoader>("XmlLayout");
     _game.uilayout().getLoaderPool()->addLoader<LayerLoader>("Layer");
     _game.uilayout().getLoaderPool()->addLoader<NodeLoader>("Node");
+    _game.uilayout().getLoaderPool()->addLoader<ImageLoader>("Image");
 
     registerClass(L);
 }

@@ -17,6 +17,10 @@ XmlLayout::WidgetPtr XmlLayout::readNode(std::string const& fileName) {
     return _layoutReader->readNode(fileName);
 }
 
+void XmlLayout::setLoader(LoaderPool const& loader) {
+    _layoutReader->setLoaderPool((_loaderPool = loader).get());
+}
+
 void XmlLayout::setFileReader(FileReaderPtr const& file_reader) {
     _layoutReader->setFileReader((_fileReader = file_reader).get());
 }

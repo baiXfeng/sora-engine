@@ -31,7 +31,6 @@ public:
             auto const top = lua_gettop(_state);
             {
                 auto ret = luaL_loadbuffer(_state, (char*)data->data(), (size_t)data->size(), data->name().c_str());
-                auto a = lua_gettop(_state);
                 if (ret) {
                     LOG("error: %s\n", lua_tostring(_state, -1));
                     lua_pop(_state, 1);
@@ -39,7 +38,6 @@ public:
                     LOG("error: %s\n", lua_tostring(_state, -1));
                     lua_pop(_state, 1);
                 }
-                auto b = lua_gettop(_state);
             }
             assert(top == lua_gettop(_state));
         }

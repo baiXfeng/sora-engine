@@ -5,6 +5,7 @@
 #include "script.h"
 #include "common/log.h"
 #include "common/file-reader.h"
+#include "lutok3.h"
 
 namespace Lua {
 
@@ -29,7 +30,31 @@ namespace Lua {
         return 0;
     }
 
-    ObjectScript::ObjectScript(lua_State* L, std::shared_ptr<mge::FileData> const& data, const char* functionNames[], size_t nameSize):L(L), object_ref(LUA_NOREF) {
+    ObjectScript::ObjectScript(lua_State* L):L(L), object_ref(LUA_NOREF) {
+
+    }
+
+    ObjectScript::~ObjectScript() {
+        for (int i = 0; i < func_refs.size(); ++i) {
+            if (func_refs[i] != LUA_NOREF) {
+                luaL_unref(L, LUA_REGISTRYINDEX, func_refs[i]);
+            }
+        }
+        unRef();
+    }
+
+    void ObjectScript::unRef() {
+        if (object_ref != LUA_NOREF) {
+            luaL_unref(L, LUA_REGISTRYINDEX, object_ref);
+            object_ref = LUA_NOREF;
+        }
+    }
+
+    int ObjectScript::getRef() const {
+        return object_ref;
+    }
+
+    void ObjectScript::Load(std::shared_ptr<mge::FileData> const& data, const char* functionNames[], size_t nameSize) {
         this->func_refs.resize(nameSize, LUA_NOREF);
         this->func_names.resize(nameSize);
         {
@@ -68,25 +93,5 @@ namespace Lua {
             }
             assert(top == lua_gettop(L));
         }
-    }
-
-    ObjectScript::~ObjectScript() {
-        for (int i = 0; i < func_refs.size(); ++i) {
-            if (func_refs[i] != LUA_NOREF) {
-                luaL_unref(L, LUA_REGISTRYINDEX, func_refs[i]);
-            }
-        }
-        unRef();
-    }
-
-    void ObjectScript::unRef() {
-        if (object_ref != LUA_NOREF) {
-            luaL_unref(L, LUA_REGISTRYINDEX, object_ref);
-            object_ref = LUA_NOREF;
-        }
-    }
-
-    int ObjectScript::getRef() const {
-        return object_ref;
     }
 }

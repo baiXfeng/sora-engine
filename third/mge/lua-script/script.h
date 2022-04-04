@@ -21,7 +21,7 @@ namespace Lua {
     public:
         typedef int32_t Function;
     public:
-        ObjectScript(lua_State* L, std::shared_ptr<mge::FileData> const& data, const char* functionNames[], size_t nameSize);
+        ObjectScript(lua_State* L);
         ~ObjectScript();
     public:
         template<typename T>
@@ -36,7 +36,11 @@ namespace Lua {
         }
         void unRef();
         int getRef() const;
+        void Load(std::shared_ptr<mge::FileData> const& data, const char* functionNames[], size_t nameSize);
         void Call(Function function) {
+            if (func_refs.empty()) {
+                return;
+            }
             auto const func_ref = func_refs[function];
             if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
                 return;
@@ -54,6 +58,9 @@ namespace Lua {
         }
         template<typename T>
         void Call(Function function, T value) {
+            if (func_refs.empty()) {
+                return;
+            }
             auto const func_ref = func_refs[function];
             if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
                 return;
@@ -72,6 +79,9 @@ namespace Lua {
         }
         template<typename RL, typename T>
         RL CallRet(Function function, T value) {
+            if (func_refs.empty()) {
+                return RL();
+            }
             auto const func_ref = func_refs[function];
             if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
                 return RL();
@@ -90,6 +100,9 @@ namespace Lua {
         }
         template<typename T1, typename T2>
         void Call(Function function, T1 value1, T2 value2) {
+            if (func_refs.empty()) {
+                return;
+            }
             auto const func_ref = func_refs[function];
             if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
                 return;
@@ -109,6 +122,27 @@ namespace Lua {
         }
         lua_State* State() const {
             return L;
+        }
+        void CallAssign(Function function, const char* name, int assign_ref) {
+            if (func_refs.empty()) {
+                return;
+            }
+            auto const func_ref = func_refs[function];
+            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF or assign_ref == LUA_NOREF) {
+                return;
+            }
+            auto const top = lua_gettop(L);
+            {
+                lua_pushcclosure(L, error_log, 0);
+                int stackTop = lua_gettop(L);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, this->object_ref);
+                ELuna::push2lua(L, name);
+                lua_rawgeti(L, LUA_REGISTRYINDEX, assign_ref);
+                lua_pcall(L, 3, 1, stackTop);
+                lua_settop(L, -3);
+            }
+            assert(top == lua_gettop(L));
         }
     protected:
         lua_State* L;

@@ -52,6 +52,7 @@ namespace ui {
 
     class ImageWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
+    protected:
         void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
@@ -61,21 +62,25 @@ namespace ui {
 
     class TTFLabelLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
+    protected:
         void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
     class ButtonWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
+    protected:
         void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
     class MaskWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
+    protected:
         void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
     class ProgressBarWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
+    protected:
         void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
@@ -85,6 +90,7 @@ namespace ui {
 
     class FrameImageWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
+    protected:
         bool hasParamList() const override;
         void onParamReceiveBegin(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) override;
         void onParamReceive(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, Params const& params) override;
@@ -96,6 +102,7 @@ namespace ui {
 
     class FrameAnimationWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
+    protected:
         bool hasParamList() const override;
         void onParamReceiveBegin(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) override;
         void onParamReceive(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, Params const& params) override;

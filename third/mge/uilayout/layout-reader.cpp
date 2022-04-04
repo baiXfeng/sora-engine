@@ -130,16 +130,21 @@ namespace ui {
             }
             loader->onParamReceiveEnd(node, parent, this);
         }
+        std::string assign;
         for (auto attr = doc().first_attribute(); not attr.empty(); attr = attr.next_attribute()) {
             // 成员绑定
             if (strcmp(attr.name(), "Assign") == 0 and owner != node) {
-                auto target = owner->to<LayoutVariableAssigner>();
-                if (target) {
-                    target->onAssignMember(owner, attr.value(), node);
-                }
+                assign = attr.value();
                 continue;
             }
             loader->onParseProperty(node, parent, this, attr.name(), attr.value());
+        }
+        if (!assign.empty()) {
+            // 成员绑定
+            auto target = owner->to<LayoutVariableAssigner>();
+            if (target) {
+                target->onAssignMember(owner, assign.c_str(), node);
+            }
         }
     }
 
