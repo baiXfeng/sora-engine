@@ -1076,6 +1076,10 @@ namespace ELuna
 
         }
 
+        LuaFunction(lua_State* L, int ref, bool owner):m_luaState(L), m_ref(ref), m_owner(owner) {
+
+        }
+
 		LuaFunction(lua_State* L, const char* funcName): m_luaState(L), m_owner(true) {
 			lua_getglobal(L, funcName);
 
@@ -1236,11 +1240,21 @@ namespace ELuna
 	class LuaFunction<LuaTable> {
 	public:
 		~LuaFunction() {
-			luaL_unref(m_luaState, LUA_REGISTRYINDEX, m_ref);
+            if (m_owner) {
+                luaL_unref(m_luaState, LUA_REGISTRYINDEX, m_ref);
+            }
 			m_luaState = NULL;
 		}
 
-		LuaFunction(lua_State* L, const char* funcName): m_luaState(L) {
+        LuaFunction(lua_State* L, int ref):m_luaState(L), m_ref(ref), m_owner(false) {
+
+        }
+
+        LuaFunction(lua_State* L, int ref, bool owner):m_luaState(L), m_ref(ref), m_owner(owner) {
+
+        }
+
+		LuaFunction(lua_State* L, const char* funcName): m_luaState(L), m_owner(true) {
 			lua_getglobal(L, funcName);
 
 			if (lua_isfunction(L, -1)) {
@@ -1380,6 +1394,7 @@ namespace ELuna
 		}
 
 	private:
+        bool m_owner;
 		int m_ref;
 		//const char* m_name;
 		lua_State* m_luaState;
@@ -1388,20 +1403,24 @@ namespace ELuna
 	template<>
 	class LuaFunction<void> {
 	public:
-		LuaFunction(lua_State* L, const char* funcName): m_luaState(L), m_owner(true) {
-			lua_getglobal(L, funcName);
-
-			if (lua_isfunction(L, -1)) {
-				m_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-			} else {
-				printf("%s is not a lua function!\n", funcName);
-				assert(0);
-			}
-		};
-
         LuaFunction(lua_State* L, int ref):m_luaState(L), m_ref(ref), m_owner(false) {
 
         }
+
+        LuaFunction(lua_State* L, int ref, bool owner):m_luaState(L), m_ref(ref), m_owner(owner) {
+
+        }
+
+        LuaFunction(lua_State* L, const char* funcName): m_luaState(L), m_owner(true) {
+            lua_getglobal(L, funcName);
+
+            if (lua_isfunction(L, -1)) {
+                m_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+            } else {
+                printf("%s is not a lua function!\n", funcName);
+                assert(0);
+            }
+        };
 
 		~LuaFunction() {
             if (m_owner) {
