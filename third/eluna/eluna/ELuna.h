@@ -1087,6 +1087,7 @@ namespace ELuna
         ~LuaFunction() {
             if (m_owner) {
                 luaL_unref(m_luaState, LUA_REGISTRYINDEX, m_ref);
+                m_ref = LUA_NOREF;
             }
             m_luaState = NULL;
         }
@@ -1265,6 +1266,7 @@ namespace ELuna
         ~LuaFunction() {
             if (m_owner) {
                 luaL_unref(m_luaState, LUA_REGISTRYINDEX, m_ref);
+                m_ref = LUA_NOREF;
             }
             m_luaState = NULL;
         }
@@ -1433,6 +1435,7 @@ namespace ELuna
 		~LuaFunction() {
             if (m_owner) {
                 luaL_unref(m_luaState, LUA_REGISTRYINDEX, m_ref);
+                m_ref = LUA_NOREF;
             }
 			m_luaState = NULL;
 		};

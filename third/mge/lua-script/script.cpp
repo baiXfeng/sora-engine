@@ -5,7 +5,6 @@
 #include "script.h"
 #include "common/log.h"
 #include "common/file-reader.h"
-#include "lutok3.h"
 
 namespace Lua {
 
