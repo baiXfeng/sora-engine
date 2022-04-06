@@ -126,6 +126,32 @@ class ImageLoader : public ui::ImageWidgetLoader {
     void onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) override;
 };
 
-void registerClass(lua_State* L);
+class Label : public mge::TTFLabel,
+              public ui::LayoutVariableAssigner,
+              public ui::LayoutNodeListener,
+              public LuaScriptHolder,
+              public LuaActionHelper {
+public:
+    enum Function {
+        OBJECT_FUNCTION_INIT = 0,
+        OBJECT_FUNCTION_RELEASE,
+        OBJECT_FUNCTION_ONASSIGN,
+        OBJECT_FUNCTION_MAX,
+    };
+    static const char* FunctionNames[OBJECT_FUNCTION_MAX];
+public:
+    Label();
+    ~Label();
+public:
+    void loadScript(std::string const& fileName);
+private:
+    bool onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) override;
+    void onLayoutLoaded() override;
+};
+
+class LabelLoader : public ui::TTFLabelLoader {
+    UI_NODE_LOADER_CREATE(Label);
+    void onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) override;
+};
 
 #endif //SDL2_UI_LUA_OBJECTS_H

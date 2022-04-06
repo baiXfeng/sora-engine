@@ -8,6 +8,8 @@
 #include "ELuna.h"
 
 void openSoraLibs(lua_State* L);
+void registerClass(lua_State* L);
+
 void import(const char* luaFileName);
 void pushScene(const char* xmlFileName);
 void replaceScene(const char* xmlFileName);

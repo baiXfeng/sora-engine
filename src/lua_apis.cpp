@@ -63,6 +63,26 @@ void openSoraLibs(lua_State* L) {
     registerClass(L);
 }
 
+void registerClass(lua_State* L) {
+    ELuna::registerClass<Layer>(L, "Layer", ELuna::constructor<Layer>);
+    ELuna::registerMethod<Layer, void, ELuna::LuaTable>(L, "runAction", &Layer::runLuaAction);
+    ELuna::registerMethod<Layer, void, const char*>(L, "stopAction", &Layer::stopLuaAction);
+
+    ELuna::registerClass<Node>(L, "Node", ELuna::constructor<Node>);
+    ELuna::registerMethod<Node, void, ELuna::LuaTable>(L, "runAction", &Node::runLuaAction);
+    ELuna::registerMethod<Node, void, const char*>(L, "stopAction", &Node::stopLuaAction);
+
+    ELuna::registerClass<Image>(L, "Image", ELuna::constructor<Image>);
+    ELuna::registerMethod<Image, void, ELuna::LuaTable>(L, "runAction", &Image::runLuaAction);
+    ELuna::registerMethod<Image, void, const char*>(L, "stopAction", &Image::stopLuaAction);
+
+    ELuna::registerClass<Label>(L, "Label", ELuna::constructor<Label>);
+    ELuna::registerMethod<Label, void, ELuna::LuaTable>(L, "runAction", &Label::runLuaAction);
+    ELuna::registerMethod<Label, void, const char*>(L, "stopAction", &Label::stopLuaAction);
+
+    //ELuna::registerMetatable<>()
+}
+
 void import(const char* luaFileName) {
     auto& state = _game.get<lutok3::State>("lua_state");
     auto data = _game.uilayout().getFileReader()->getData(luaFileName);

@@ -11,22 +11,6 @@
 #include "common/mouse.h"
 #include "ELuna.h"
 
-void registerClass(lua_State* L) {
-    ELuna::registerClass<Layer>(L, "Layer", ELuna::constructor<Layer>);
-    ELuna::registerMethod<Layer, void, ELuna::LuaTable>(L, "runAction", &Layer::runLuaAction);
-    ELuna::registerMethod<Layer, void, const char*>(L, "stopAction", &Layer::stopLuaAction);
-
-    ELuna::registerClass<Node>(L, "Node", ELuna::constructor<Node>);
-    ELuna::registerMethod<Node, void, ELuna::LuaTable>(L, "runAction", &Node::runLuaAction);
-    ELuna::registerMethod<Node, void, const char*>(L, "stopAction", &Node::stopLuaAction);
-
-    ELuna::registerClass<Image>(L, "Image", ELuna::constructor<Image>);
-    ELuna::registerMethod<Image, void, ELuna::LuaTable>(L, "runAction", &Image::runLuaAction);
-    ELuna::registerMethod<Image, void, const char*>(L, "stopAction", &Image::stopLuaAction);
-
-    //ELuna::registerMetatable<>()
-}
-
 LuaScriptHolder::LuaScriptHolder() {
     initScript();
 }
@@ -426,6 +410,8 @@ void Node::onTouchEnded(mge::Vector2i const& point) {
     }
 }
 
+//===============================================================================
+
 Layer::Layer() {
     connect(ON_ENTER, [](Widget* sender){
         _game.gamepad().add(sender->ptr());
@@ -441,6 +427,8 @@ bool Layer::onTouchBegen(mge::Vector2i const& point) {
     }
     return Node::onTouchBegen(point);
 }
+
+//===============================================================================
 
 const char* Image::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "init",
@@ -489,3 +477,54 @@ void ImageLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::La
         ImageWidgetLoader::onParseProperty(node, parent, reader, name, value);
     }
 }
+
+//===============================================================================
+
+const char* Label::FunctionNames[OBJECT_FUNCTION_MAX] = {
+        "init",
+        "release",
+};
+
+Label::Label():LuaActionHelper(this) {
+    _script->Ref(this);
+}
+
+Label::~Label() {
+    if (_script != nullptr) {
+        _script->Call(OBJECT_FUNCTION_RELEASE);
+    }
+}
+
+bool Label::onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) {
+    auto lua_script_holder = dynamic_cast<LuaScriptHolder*>(node);
+    if (lua_script_holder != nullptr) {
+        auto& script = lua_script_holder->script();
+        _script->CallAssign(OBJECT_FUNCTION_ONASSIGN, name, script->getRef());
+        return true;
+    }
+    return false;
+}
+
+void Label::loadScript(std::string const& fileName) {
+    auto data = _game.uilayout().getFileReader()->getData(fileName);
+    if (data->empty()) {
+        LOG_ERROR("error: Label::loadScript fail, <%s> not exist.", fileName.c_str());
+        return;
+    }
+    _script->Load(data, FunctionNames, OBJECT_FUNCTION_MAX);
+}
+
+void Label::onLayoutLoaded() {
+    if (_script != nullptr) {
+        _script->Call(OBJECT_FUNCTION_INIT);
+    }
+}
+
+void LabelLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
+    if (strcmp(name, "Script") == 0) {
+        node->fast_to<Label>()->loadScript(value);
+    } else {
+        TTFLabelLoader::onParseProperty(node, parent, reader, name, value);
+    }
+}
+
