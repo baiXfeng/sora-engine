@@ -78,7 +78,7 @@ namespace Lua {
             assert(top == lua_gettop(L));
         }
         template<typename RL, typename T>
-        RL CallRet(Function function, T value) {
+        RL Call(Function function, T value) {
             if (func_refs.empty()) {
                 return RL();
             }

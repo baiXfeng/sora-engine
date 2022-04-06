@@ -6,8 +6,10 @@
 #define SDL2_UI_LUA_OBJECTS_H
 
 #include "common/widget.h"
+#include "common/action.h"
 #include "uilayout/ui-layout.h"
 #include "lutok3.h"
+#include "ELuna.h"
 
 namespace Lua {
     class ObjectScript;
@@ -31,8 +33,23 @@ protected:
     LuaScript _script;
 };
 
-class Node : public mge::Widget, public mge::FingerResponder, public ui::LayoutVariableAssigner, public ui::LayoutNodeListener,
-             public LuaScriptHolder {
+class LuaActionHelper {
+public:
+    LuaActionHelper(mge::Widget* target);
+    virtual ~LuaActionHelper() {}
+public:
+    void runLuaAction(ELuna::LuaTable action);
+    void stopLuaAction(const char* name);
+protected:
+    mge::Widget* _actionTarget;
+};
+
+class Node : public mge::Widget,
+        public mge::FingerResponder,
+        public ui::LayoutVariableAssigner,
+        public ui::LayoutNodeListener,
+        public LuaScriptHolder,
+        public LuaActionHelper {
 public:
     enum Function {
         OBJECT_FUNCTION_INIT = 0,
@@ -56,7 +73,7 @@ public:
 protected:
     bool onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) override;
     void onLayoutLoaded() override;
-    void update(float delta) override;
+    void onUpdate(float delta) override;
     void onButtonDown(int key) override;
     void onButtonUp(int key) override;
     void onJoyAxisMotion(JOYIDX joy_id, int x, int y) override;
@@ -81,7 +98,11 @@ class LayerLoader : public NodeLoader {
     UI_NODE_LOADER_CREATE(Layer);
 };
 
-class Image : public mge::ImageWidget, public ui::LayoutVariableAssigner, public ui::LayoutNodeListener, public LuaScriptHolder {
+class Image : public mge::ImageWidget,
+        public ui::LayoutVariableAssigner,
+        public ui::LayoutNodeListener,
+        public LuaScriptHolder,
+        public LuaActionHelper {
 public:
     enum Function {
         OBJECT_FUNCTION_INIT = 0,

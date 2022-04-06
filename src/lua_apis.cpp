@@ -75,6 +75,8 @@ void import(const char* luaFileName) {
             LOG("error: %s\n", lua_tostring(state(), -1));
             lua_pop(state(), 1);
         }
+    } else {
+        LOG_ERROR("error: import %s not exist.", luaFileName);
     }
 }
 

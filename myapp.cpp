@@ -21,12 +21,13 @@ public:
     MyApp():_state(ELuna::openLua()) {}
     void init() override {
         LOG_INIT();
+        openSoraLibs(_state);
+        _game.set<lutok3::State>("lua_state", _state);
+
         auto data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
         if (data->empty()) {
             LOG_ERROR("assets/startup.lua not exist.\n");
         } else {
-            openSoraLibs(_state);
-            _game.set<lutok3::State>("lua_state", _state);
             ELuna::doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
         }
     }
