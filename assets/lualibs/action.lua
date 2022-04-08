@@ -63,6 +63,22 @@ _action = {
         }
     end,
 
+    RotationTo = function(rotation, duration)
+        return {
+            type = "RotationTo",
+            rotation = rotation,    -- float
+            duration = duration,    -- float
+        }
+    end,
+
+    RotationBy = function(rotation, duration)
+        return {
+            type = "RotationBy",
+            rotation = rotation,    -- float
+            duration = duration,    -- float
+        }
+    end,
+
     Blink = function(times, duration)
         return {
             type = "Blink",

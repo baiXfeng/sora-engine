@@ -7,7 +7,6 @@
 #include "common/xml_layout.h"
 #include "common/file-reader.h"
 #include "common/log.h"
-#include "common/widget.h"
 #include "lutok3.h"
 #include "lua_objects.h"
 
@@ -31,7 +30,7 @@ static void registerCFunction(lua_State* L, const char* tableName, const char* f
     assert(top == state.getTop());
 }
 
-void setValueNil(lua_State* L, const char* valueName) {
+static void setValueNil(lua_State* L, const char* valueName) {
     auto const top = lua_gettop(L);
     {
         lua_pushnil(L);
@@ -59,28 +58,34 @@ void openSoraLibs(lua_State* L) {
     _game.uilayout().getLoaderPool()->addLoader<LayerLoader>("Layer");
     _game.uilayout().getLoaderPool()->addLoader<NodeLoader>("Node");
     _game.uilayout().getLoaderPool()->addLoader<ImageLoader>("Image");
+    _game.uilayout().getLoaderPool()->addLoader<LabelLoader>("Label");
 
     registerClass(L);
 }
 
+template<typename T>
+void registerClass(lua_State* L, const char* className) {
+    ELuna::registerClass<T>(L, className, ELuna::constructor<T>);
+    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "runAction", &T::runLuaAction);
+    ELuna::registerMethod<T, void, const char*>(L, "stopAction", &T::stopLuaAction);
+    ELuna::registerMethod<T, bool, const char*>(L, "hasAction", &T::hasLuaAction);
+    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "setPosition", &T::setLuaPosition);
+    ELuna::registerMethod<T, ELuna::LuaTable>(L, "position", &T::getLuaPosition);
+    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "setSize", &T::setLuaSize);
+    ELuna::registerMethod<T, ELuna::LuaTable>(L, "size", &T::getLuaSize);
+    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "setScale", &T::setLuaScale);
+    ELuna::registerMethod<T, ELuna::LuaTable>(L, "scale", &T::getLuaScale);
+    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "setAnchor", &T::setLuaAnchor);
+    ELuna::registerMethod<T, ELuna::LuaTable>(L, "anchor", &T::getLuaAnchor);
+    ELuna::registerMethod<T, void, float>(L, "setRotation", &T::setRotation);
+    ELuna::registerMethod<T, float>(L, "rotation", &T::getLuaRotation);
+}
+
 void registerClass(lua_State* L) {
-    ELuna::registerClass<Layer>(L, "Layer", ELuna::constructor<Layer>);
-    ELuna::registerMethod<Layer, void, ELuna::LuaTable>(L, "runAction", &Layer::runLuaAction);
-    ELuna::registerMethod<Layer, void, const char*>(L, "stopAction", &Layer::stopLuaAction);
-
-    ELuna::registerClass<Node>(L, "Node", ELuna::constructor<Node>);
-    ELuna::registerMethod<Node, void, ELuna::LuaTable>(L, "runAction", &Node::runLuaAction);
-    ELuna::registerMethod<Node, void, const char*>(L, "stopAction", &Node::stopLuaAction);
-
-    ELuna::registerClass<Image>(L, "Image", ELuna::constructor<Image>);
-    ELuna::registerMethod<Image, void, ELuna::LuaTable>(L, "runAction", &Image::runLuaAction);
-    ELuna::registerMethod<Image, void, const char*>(L, "stopAction", &Image::stopLuaAction);
-
-    ELuna::registerClass<Label>(L, "Label", ELuna::constructor<Label>);
-    ELuna::registerMethod<Label, void, ELuna::LuaTable>(L, "runAction", &Label::runLuaAction);
-    ELuna::registerMethod<Label, void, const char*>(L, "stopAction", &Label::stopLuaAction);
-
-    //ELuna::registerMetatable<>()
+    registerClass<Layer>(L, "Layer");
+    registerClass<Node>(L, "Node");
+    registerClass<Image>(L, "Image");
+    registerClass<Label>(L, "Label");
 }
 
 void import(const char* luaFileName) {

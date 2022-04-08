@@ -237,6 +237,28 @@ private:
     Vector2f _distance;
 };
 
+class RotationTo : public WidgetAction {
+public:
+    RotationTo(Widget* target, float rotation, float duration);
+private:
+    void onFinish() override;
+    void onStep(float progress, float delta) override;
+private:
+    float _rotation;
+};
+
+class RotationBy : public WidgetAction {
+public:
+    RotationBy(Widget* target, float rotation, float duration);
+private:
+    void onFinish() override;
+    void onStep(float progress, float delta) override;
+    void Reset() override;
+private:
+    float _rotation;
+    float _distance;
+};
+
 class Blink : public Action {
 public:
     Blink(Widget* target, int times, float duration);

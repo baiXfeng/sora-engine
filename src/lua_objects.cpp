@@ -47,6 +47,8 @@ mge::Action::Ptr newScaleTo(mge::Widget* target, ELuna::LuaTable action);
 mge::Action::Ptr newScaleBy(mge::Widget* target, ELuna::LuaTable action);
 mge::Action::Ptr newMoveTo(mge::Widget* target, ELuna::LuaTable action);
 mge::Action::Ptr newMoveBy(mge::Widget* target, ELuna::LuaTable action);
+mge::Action::Ptr newRotationTo(mge::Widget* target, ELuna::LuaTable action);
+mge::Action::Ptr newRotationBy(mge::Widget* target, ELuna::LuaTable action);
 mge::Action::Ptr newBlink(mge::Widget* target, ELuna::LuaTable action);
 
 static std::map<std::string, std::function<mge::Action::Ptr(mge::Widget*, ELuna::LuaTable)>> LuaActionBuilder = {
@@ -58,6 +60,8 @@ static std::map<std::string, std::function<mge::Action::Ptr(mge::Widget*, ELuna:
         {"ScaleBy", &newScaleBy},
         {"MoveTo", &newMoveTo},
         {"MoveBy", &newMoveBy},
+        {"RotationTo", &newRotationTo},
+        {"RotationBy", &newRotationBy},
         {"Blink", &newBlink},
 };
 
@@ -251,6 +255,19 @@ mge::Action::Ptr newMoveBy(mge::Widget* target, ELuna::LuaTable action) {
     return mge::Action::Ptr(new mge::MoveBy(target, vec2f, duration));
 }
 
+
+mge::Action::Ptr newRotationTo(mge::Widget* target, ELuna::LuaTable action) {
+    auto duration = action.get<const char*, float>("duration");
+    auto rotation = action.get<const char*, float>("rotation");
+    return mge::Action::Ptr(new mge::RotationTo(target, rotation, duration));
+}
+
+mge::Action::Ptr newRotationBy(mge::Widget* target, ELuna::LuaTable action) {
+    auto duration = action.get<const char*, float>("duration");
+    auto rotation = action.get<const char*, float>("rotation");
+    return mge::Action::Ptr(new mge::RotationBy(target, rotation, duration));
+}
+
 mge::Action::Ptr newBlink(mge::Widget* target, ELuna::LuaTable action) {
     auto duration = action.get<const char*, float>("duration");
     auto times = action.get<const char*, int>("times");
@@ -289,6 +306,68 @@ void LuaActionHelper::stopLuaAction(const char* name) {
     _actionTarget->stopAction(name);
 }
 
+bool LuaActionHelper::hasLuaAction(const char* name) {
+    return _actionTarget->hasAction(name);
+}
+
+//===============================================================================
+
+LuaWidgetHelper::LuaWidgetHelper(mge::Widget* target): _widget(target), _state(_game.get<lutok3::State>("lua_state")()) {
+
+}
+
+void LuaWidgetHelper::setLuaPosition(ELuna::LuaTable position) {
+    _widget->setPosition(position.get<const char*, float>("x"), position.get<const char*, float>("y"));
+}
+
+ELuna::LuaTable LuaWidgetHelper::getLuaPosition() {
+    auto const& pos = _widget->position();
+    ELuna::LuaTable table(_state);
+    table.set("x", pos.x);
+    table.set("y", pos.y);
+    return table;
+}
+
+void LuaWidgetHelper::setLuaSize(ELuna::LuaTable size) {
+    _widget->setSize(size.get<const char*, float>("x"), size.get<const char*, float>("y"));
+}
+
+ELuna::LuaTable LuaWidgetHelper::getLuaSize() {
+    auto const& size = _widget->size();
+    ELuna::LuaTable table(_state);
+    table.set("x", size.x);
+    table.set("y", size.y);
+    return table;
+}
+
+void LuaWidgetHelper::setLuaScale(ELuna::LuaTable scale) {
+    _widget->setScale(scale.get<const char*, float>("x"), scale.get<const char*, float>("y"));
+}
+
+ELuna::LuaTable LuaWidgetHelper::getLuaScale() {
+    auto const& scale = _widget->scale();
+    ELuna::LuaTable table(_state);
+    table.set("x", scale.x);
+    table.set("y", scale.y);
+    return table;
+}
+
+void LuaWidgetHelper::setLuaAnchor(ELuna::LuaTable anchor) {
+    _widget->setAnchor(anchor.get<const char*, float>("x"), anchor.get<const char*, float>("y"));
+}
+
+ELuna::LuaTable LuaWidgetHelper::getLuaAnchor() {
+    auto const& anchor = _widget->anchor();
+    ELuna::LuaTable table(_state);
+    table.set("x", anchor.x);
+    table.set("y", anchor.y);
+    return table;
+}
+
+float LuaWidgetHelper::getLuaRotation() {
+    return _widget->rotation();
+}
+
 //===============================================================================
 
 void NodeLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
@@ -312,7 +391,7 @@ const char* Node::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "on_assign",
 };
 
-Node::Node():FingerResponder(this), LuaActionHelper(this) {
+Node::Node(): FingerResponder(this), LuaActionHelper(this), LuaWidgetHelper(this) {
     connect(ON_ENTER, [this](Widget* sender){
         _game.mouse().add(this);
     });
@@ -433,9 +512,10 @@ bool Layer::onTouchBegen(mge::Vector2i const& point) {
 const char* Image::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "init",
         "release",
+        "on_assign",
 };
 
-Image::Image():LuaActionHelper(this) {
+Image::Image(): LuaActionHelper(this), LuaWidgetHelper(this) {
     _script->Ref(this);
 }
 
@@ -483,9 +563,10 @@ void ImageLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::La
 const char* Label::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "init",
         "release",
+        "on_assign",
 };
 
-Label::Label():LuaActionHelper(this) {
+Label::Label(): LuaActionHelper(this), LuaWidgetHelper(this) {
     _script->Ref(this);
 }
 

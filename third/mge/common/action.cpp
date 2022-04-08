@@ -330,6 +330,43 @@ void MoveBy::Reset() {
 
 //=====================================================================================
 
+RotationTo::RotationTo(Widget* target, float rotation, float duration):WidgetAction(target, duration), _rotation(rotation) {
+
+}
+
+void RotationTo::onFinish() {
+    _target->setRotation(_rotation);
+}
+
+void RotationTo::onStep(float progress, float delta) {
+    auto distance = (_rotation - _target->rotation()) * delta;
+    _target->setRotation(_target->rotation() + distance);
+}
+
+//=====================================================================================
+
+RotationBy::RotationBy(Widget* target, float rotation, float duration):WidgetAction(target, duration), _rotation(rotation), _distance(rotation) {
+
+}
+
+void RotationBy::onFinish() {
+    _target->setRotation(_target->rotation() + _distance);
+}
+
+void RotationBy::onStep(float progress, float delta) {
+    auto rotation = _rotation * (1 - progress);
+    auto distance = rotation * delta;
+    _target->setRotation(_target->rotation() + distance);
+    _distance -= distance;
+}
+
+void RotationBy::Reset() {
+    WidgetAction::Reset();
+    _distance = _rotation;
+}
+
+//=====================================================================================
+
 Blink::Blink(Widget* target, int times, float duration):
 _target(target),
 _duration(duration),

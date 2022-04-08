@@ -40,16 +40,37 @@ public:
 public:
     void runLuaAction(ELuna::LuaTable action);
     void stopLuaAction(const char* name);
+    bool hasLuaAction(const char* name);
 protected:
     mge::Widget* _actionTarget;
 };
 
+class LuaWidgetHelper {
+public:
+    LuaWidgetHelper(mge::Widget* target);
+public:
+    void setLuaPosition(ELuna::LuaTable position);
+    ELuna::LuaTable getLuaPosition();
+    void setLuaSize(ELuna::LuaTable size);
+    ELuna::LuaTable getLuaSize();
+    void setLuaScale(ELuna::LuaTable scale);
+    ELuna::LuaTable getLuaScale();
+    void setLuaAnchor(ELuna::LuaTable anchor);
+    ELuna::LuaTable getLuaAnchor();
+public:
+    float getLuaRotation();
+protected:
+    mge::Widget* _widget;
+    lua_State* _state;
+};
+
 class Node : public mge::Widget,
-        public mge::FingerResponder,
-        public ui::LayoutVariableAssigner,
-        public ui::LayoutNodeListener,
-        public LuaScriptHolder,
-        public LuaActionHelper {
+             public mge::FingerResponder,
+             public ui::LayoutVariableAssigner,
+             public ui::LayoutNodeListener,
+             public LuaScriptHolder,
+             public LuaActionHelper,
+             public LuaWidgetHelper {
 public:
     enum Function {
         OBJECT_FUNCTION_INIT = 0,
@@ -99,10 +120,11 @@ class LayerLoader : public NodeLoader {
 };
 
 class Image : public mge::ImageWidget,
-        public ui::LayoutVariableAssigner,
-        public ui::LayoutNodeListener,
-        public LuaScriptHolder,
-        public LuaActionHelper {
+              public ui::LayoutVariableAssigner,
+              public ui::LayoutNodeListener,
+              public LuaScriptHolder,
+              public LuaActionHelper,
+              public LuaWidgetHelper {
 public:
     enum Function {
         OBJECT_FUNCTION_INIT = 0,
@@ -130,7 +152,8 @@ class Label : public mge::TTFLabel,
               public ui::LayoutVariableAssigner,
               public ui::LayoutNodeListener,
               public LuaScriptHolder,
-              public LuaActionHelper {
+              public LuaActionHelper,
+              public LuaWidgetHelper {
 public:
     enum Function {
         OBJECT_FUNCTION_INIT = 0,
