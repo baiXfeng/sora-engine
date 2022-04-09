@@ -54,7 +54,7 @@ void openSoraLibs(lua_State* L) {
     registerCFunction2Table(L, "scene", "pop", &popScene);
 
     _game.uilayout().setLoader(mge::XmlLayout::LoaderPool(new ui::LoaderPool));
-    _game.uilayout().getLoaderPool()->addLoader<ui::WidgetLoader>("XmlLayout");
+    _game.uilayout().getLoaderPool()->addLoader<ui::WidgetLoader>("Layout");
     _game.uilayout().getLoaderPool()->addLoader<LayerLoader>("Layer");
     _game.uilayout().getLoaderPool()->addLoader<NodeLoader>("Node");
     _game.uilayout().getLoaderPool()->addLoader<ImageLoader>("Image");
@@ -79,6 +79,14 @@ void registerClass(lua_State* L, const char* className) {
     ELuna::registerMethod<T, ELuna::LuaTable>(L, "anchor", &T::getLuaAnchor);
     ELuna::registerMethod<T, void, float>(L, "setRotation", &T::setRotation);
     ELuna::registerMethod<T, float>(L, "rotation", &T::getLuaRotation);
+    ELuna::registerMethod<T, void, unsigned char>(L, "setOpacity", &T::setOpacity);
+    ELuna::registerMethod<T, unsigned char>(L, "opacity", &T::getLuaOpacity);
+    ELuna::registerMethod<T, void, bool>(L, "setVisible", &T::setVisible);
+    ELuna::registerMethod<T, bool>(L, "visible", &T::getLuaVisible);
+    ELuna::registerMethod<T, void, bool>(L, "setClip", &T::enableClip);
+    ELuna::registerMethod<T, void>(L, "removeFromParent", &T::removeFromParent);
+    ELuna::registerMethod<T>(L, "parent", &T::getWidgetParent);
+    ELuna::registerMethod<T>(L, "add", &T::addWidgetFromLayout);
 }
 
 void registerClass(lua_State* L) {
@@ -86,6 +94,8 @@ void registerClass(lua_State* L) {
     registerClass<Node>(L, "Node");
     registerClass<Image>(L, "Image");
     registerClass<Label>(L, "Label");
+
+    ELuna::registerClass<mge::Widget>(L, "Widget", ELuna::constructor<mge::Widget>);
 }
 
 void import(const char* luaFileName) {

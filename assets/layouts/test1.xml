@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Layout><Layer Script='assets/scripts/test1.lua'><Image Source='assets/images/title-bg.png' Assign='bg'/><Image Source='assets/images/title.png' Position='50%, 50%' Anchor='0.5, 0.5'/></Layer></Layout>

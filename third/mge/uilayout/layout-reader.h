@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <vector>
+#include <map>
 
 namespace mge {
     class Widget;
@@ -24,6 +25,7 @@ namespace ui {
         typedef std::shared_ptr<LayoutInfo> Info;
         typedef std::vector<Info> InfoStack;
         typedef std::vector<mge::Widget*> OwnerStack;
+        typedef std::vector<NodeLoader*> LayoutLoader;
     public:
         LayoutReader(LoaderPool* loader_library, FileReader* r);
         virtual ~LayoutReader();
@@ -42,6 +44,7 @@ namespace ui {
         FileReader* _fileReader;
         InfoStack _info;
         OwnerStack _owner;
+        LayoutLoader _layoutLoader;
     };
 }
 

@@ -47,18 +47,7 @@ namespace ui {
             return Node();
         }
 
-        if (info().RootWidgetName.empty()) {
-            // 未指派根视图名字
-            doc.reset(doc().first_child());
-            assert(!doc().empty() && strcmp(doc().name(), "XmlLayout") != 0 && "Reader::readNode fail<3>.");
-        } else {
-            // 使用指派的视图名字
-            doc.reset(doc().find_node([this](pugi::xml_node const& n) {
-                return strcmp(n.name(), info().RootWidgetName.c_str()) == 0;
-            }));
-            assert(!doc().empty() && strcmp(doc().name(), "XmlLayout") != 0 && "Reader::readNode fail<4>.");
-        }
-
+        doc.reset(doc().first_child());
         auto node = readNode(parent, &doc, true);
         _info.pop_back();
         _owner.pop_back();
@@ -67,25 +56,38 @@ namespace ui {
 
     LayoutReader::Node LayoutReader::readNode(mge::Widget* parent, Document* d, bool owner) {
         auto& doc = *d;
-        if (strcmp(doc().name(), "WidgetParam") == 0) {
-            // 不处理参数列表
+
+        if (strcmp(doc().name(), "Layout") == 0) {
+            // xml视图布局文件
+            auto attr = doc().attribute("File");
+            if (!attr.empty()) {
+                _layoutLoader.emplace_back(nullptr);
+                auto node = readNode(attr.value(), parent);
+                if (node != nullptr) {
+                    this->parseProperties(_layoutLoader.back(), node.get(), parent, d);
+                    for (auto iter = doc().begin(); iter != doc().end(); iter++) {
+                        Document doc(*iter);
+                        if (auto child = readNode(node.get(), &doc); child != nullptr) {
+                            node->addChild(child);
+                        }
+                    }
+                }
+                _layoutLoader.pop_back();
+                return node;
+            }
             return nullptr;
         }
+
         auto loader = _loader->getLoader(doc().name());
         if (loader == nullptr) {
             LOG_ERROR("LayoutReader::readNode: %s's loader is not register.\n", doc().name());
             return nullptr;
         }
-        if (strcmp(doc().name(), "XmlLayout") == 0) {
-            // xml视图布局文件
-            auto attr = doc().attribute("File");
-            if (!attr.empty()) {
-                auto node = readNode(attr.value(), parent);
-                this->parseProperties(loader, node.get(), parent, d);
-                return node;
-            }
-            return nullptr;
+
+        if (_layoutLoader.size() and _layoutLoader.back() == nullptr) {
+            _layoutLoader.back() = loader;
         }
+
         // 视图类
         auto node = loader->loadNode(parent, this);
 
@@ -114,22 +116,6 @@ namespace ui {
         auto& doc = *d;
         auto owner = this->owner();
 
-        if (loader->hasParamList()) {
-            // 处理参数列表
-            loader->onParamReceiveBegin(node, parent, this);
-            std::map<std::string, std::string> params;
-            for (auto iter = doc().begin(); iter != doc().end(); iter++) {
-                Document doc(*iter);
-                if (strcmp(doc().name(), "WidgetParam") == 0) {
-                    for (auto attr = doc().first_attribute(); not attr.empty(); attr = attr.next_attribute()) {
-                        params.emplace(std::make_pair(attr.name(), attr.value()));
-                    }
-                    loader->onParamReceive(node, parent, this, params);
-                    params.clear();
-                }
-            }
-            loader->onParamReceiveEnd(node, parent, this);
-        }
         std::string assign;
         for (auto attr = doc().first_attribute(); not attr.empty(); attr = attr.next_attribute()) {
             // 成员绑定

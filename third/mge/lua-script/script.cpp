@@ -54,6 +54,12 @@ namespace Lua {
     }
 
     void ObjectScript::Load(std::shared_ptr<mge::FileData> const& data, const char* functionNames[], size_t nameSize) {
+        // 释放旧引用
+        for (int i = 0; i < func_refs.size(); ++i) {
+            if (func_refs[i] != LUA_NOREF) {
+                luaL_unref(L, LUA_REGISTRYINDEX, func_refs[i]);
+            }
+        }
         this->func_refs.resize(nameSize, LUA_NOREF);
         this->func_names.resize(nameSize);
         {

@@ -24,7 +24,7 @@ namespace ui {
         return createNode(parent, reader);
     }
 
-    void NodeLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
+    bool NodeLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
         if (strcmp(name, "Position") == 0) {
             std::vector<std::string> ret;
             pystring::split(value, ret, ",");
@@ -43,6 +43,7 @@ namespace ui {
                 }
                 node->setPosition(x, y);
             }
+            return true;
         } else if (strcmp(name, "Size") == 0) {
             std::vector<std::string> ret;
             pystring::split(value, ret, ",");
@@ -61,12 +62,14 @@ namespace ui {
                 }
                 node->setSize(x, y);
             }
+            return true;
         } else if (strcmp(name, "Anchor") == 0) {
             std::vector<std::string> ret;
             pystring::split(value, ret, ",");
             if (ret.size() == 2) {
                 node->setAnchor(atof(ret[0].c_str()), atof(ret[1].c_str()));
             }
+            return true;
         } else if (strcmp(name, "Scale") == 0) {
             std::vector<std::string> ret;
             pystring::split(value, ret, ",");
@@ -75,17 +78,24 @@ namespace ui {
             } else if (ret.size() == 1) {
                 node->setScale(atof(ret[0].c_str()));
             }
+            return true;
         } else if (strcmp(name, "Rotation") == 0) {
             node->setRotation(atof(value));
+            return true;
         } else if (strcmp(name, "Name") == 0) {
             node->setName(value);
+            return true;
         } else if (strcmp(name, "Visible") == 0) {
             node->setVisible(strcmp(value, "true") == 0);
+            return true;
         } else if (strcmp(name, "Clip") == 0) {
             node->enableClip(strcmp(value, "true") == 0);
+            return true;
         } else if (strcmp(name, "EnableUpdate") == 0) {
             node->enableUpdate(strcmp(value, "true") == 0);
+            return true;
         }
+        return false;
     }
 
     NodeLoader::Selector NodeLoader::onResolveSelector(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
@@ -100,11 +110,12 @@ namespace ui {
         return Node(new mge::ImageWidget);
     }
 
-    void ImageWidgetLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
+    bool ImageWidgetLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
         if (strcmp(name, "Source") == 0) {
             node->fast_to<mge::ImageWidget>()->setTexture(res::load_texture(value));
+            return true;
         } else {
-            NodeLoader::onParseProperty(node, parent, reader, name, value);
+            return NodeLoader::onParseProperty(node, parent, reader, name, value);
         }
     }
 
@@ -145,7 +156,7 @@ namespace ui {
         };
     }
 
-    void TTFLabelLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
+    bool TTFLabelLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
         if (strcmp(name, "Font") == 0) {
             std::vector<std::string> ret;
             pystring::split(value, ret, ":");
@@ -153,12 +164,15 @@ namespace ui {
                 auto font = res::load_ttf_font(ret[0], atoi(ret[1].c_str()));
                 node->fast_to<TTFLabel>()->setFont(font);
             }
+            return true;
         } else if (strcmp(name, "Text") == 0) {
             node->fast_to<TTFLabel>()->setString(value);
+            return true;
         } else if (strcmp(name, "Color") == 0) {
             node->fast_to<TTFLabel>()->font()->setColor(getHexColor(value));
+            return true;
         } else {
-            NodeLoader::onParseProperty(node, parent, reader, name, value);
+            return NodeLoader::onParseProperty(node, parent, reader, name, value);
         }
     }
 
@@ -166,22 +180,28 @@ namespace ui {
         return Node(new mge::ButtonWidget);
     }
 
-    void ButtonWidgetLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
+    bool ButtonWidgetLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
         if (strcmp(name, "Normal") == 0) {
             node->fast_to<ButtonWidget>()->setNormalTexture(res::load_texture(value));
+            return true;
         } else if (strcmp(name, "Pressed") == 0) {
             node->fast_to<ButtonWidget>()->setPressedTexture(res::load_texture(value));
+            return true;
         } else if (strcmp(name, "Disabled") == 0) {
             node->fast_to<ButtonWidget>()->setDisabledTexture(res::load_texture(value));
+            return true;
         } else if (strcmp(name, "Enable") == 0) {
             node->fast_to<ButtonWidget>()->setEnable(strcmp(value, "true") == 0);
+            return true;
         } else if (strcmp(name, "State") == 0) {
             node->fast_to<ButtonWidget>()->setState(ButtonWidget::State(atoi(value)));
+            return true;
         } else if (strcmp(name, "Selector") == 0) {
             auto selector = onResolveSelector(node, parent, reader, name, value);
             node->fast_to<ButtonWidget>()->setSelector(selector);
+            return true;
         } else {
-            NodeLoader::onParseProperty(node, parent, reader, name, value);
+            return NodeLoader::onParseProperty(node, parent, reader, name, value);
         }
     }
 
@@ -189,11 +209,12 @@ namespace ui {
         return Node(new mge::MaskWidget({255, 255, 255, 255}));
     }
 
-    void MaskWidgetLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
+    bool MaskWidgetLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
         if (strcmp(name, "Color") == 0) {
             node->fast_to<MaskWidget>()->setColor(getHexColor(value));
+            return true;
         } else {
-            NodeLoader::onParseProperty(node, parent, reader, name, value);
+            return NodeLoader::onParseProperty(node, parent, reader, name, value);
         }
     }
 
@@ -201,15 +222,18 @@ namespace ui {
         return Node(new mge::ProgressBarWidget);
     }
 
-    void ProgressBarWidgetLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
+    bool ProgressBarWidgetLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) {
         if (strcmp(name, "Bg") == 0) {
             node->fast_to<ProgressBarWidget>()->setBgTexture(res::load_texture(value));
+            return true;
         } else if (strcmp(name, "Bar") == 0) {
             node->fast_to<ProgressBarWidget>()->setBarTexture(res::load_texture(value));
+            return true;
         } else if (strcmp(name, "Dot") == 0) {
             node->fast_to<ProgressBarWidget>()->setDotTexture(res::load_texture(value));
+            return true;
         } else {
-            NodeLoader::onParseProperty(node, parent, reader, name, value);
+            return NodeLoader::onParseProperty(node, parent, reader, name, value);
         }
     }
 
@@ -217,51 +241,4 @@ namespace ui {
         return Node(new mge::RenderTargetWidget);
     }
 
-    Node FrameImageWidgetLoader::createNode(mge::Widget* parent, LayoutReader* reader) {
-        return Node(new mge::FrameImageWidget);
-    }
-
-    bool FrameImageWidgetLoader::hasParamList() const {
-        return true;
-    }
-
-    void FrameImageWidgetLoader::onParamReceiveBegin(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {
-        _frames.clear();
-    }
-
-    void FrameImageWidgetLoader::onParamReceive(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, Params const& params) {
-        if (auto iter = params.find("Source"); iter != params.end()) {
-            if (auto texture = res::load_texture(iter->second); texture != nullptr) {
-                _frames.emplace_back( res::load_texture(iter->second) );
-            }
-        }
-    }
-
-    void FrameImageWidgetLoader::onParamReceiveEnd(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {
-        node->fast_to<FrameImageWidget>()->setFrames(_frames);
-    }
-
-    Node FrameAnimationWidgetLoader::createNode(mge::Widget* parent, LayoutReader* reader) {
-        return Node(new mge::FrameAnimationWidget);
-    }
-
-    bool FrameAnimationWidgetLoader::hasParamList() const {
-        return true;
-    }
-
-    void FrameAnimationWidgetLoader::onParamReceiveBegin(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {
-        _frames.clear();
-    }
-
-    void FrameAnimationWidgetLoader::onParamReceive(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, Params const& params) {
-        if (auto iter = params.find("Source"); iter != params.end()) {
-            if (auto texture = res::load_texture(iter->second); texture != nullptr) {
-                _frames.emplace_back( res::load_texture(iter->second) );
-            }
-        }
-    }
-
-    void FrameAnimationWidgetLoader::onParamReceiveEnd(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {
-        node->fast_to<FrameAnimationWidget>()->setFrames(_frames);
-    }
 }

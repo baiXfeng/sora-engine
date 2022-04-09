@@ -78,7 +78,6 @@ public:
     void enableClip(bool clip);
     void setVisible(bool visible);
     void performLayout();
-    void try_performLayout();
 public:
     bool isTouchEnabled() const;
     void setTouchEnable(bool b);

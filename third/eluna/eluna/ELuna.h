@@ -533,6 +533,18 @@ namespace ELuna
 		};\
 	};
 
+    template<typename T>
+    struct MethodClass : GenericMethod {\
+		typedef int (T::* TFUNC)(lua_State *L);\
+		TFUNC m_func;\
+		MethodClass(const char* name, TFUNC func): GenericMethod(name), m_func(func) {};\
+		~MethodClass() {};\
+		inline virtual int call(lua_State *L) {\
+			T* obj = read2cpp<T*>(L, 1);\
+			return (obj->*m_func)(L);\
+		};\
+	};
+
 	ELUNA_MAKE_METHODCLASSX(0)
 	ELUNA_MAKE_METHODCLASSX(1)
 	ELUNA_MAKE_METHODCLASSX(2)
@@ -834,6 +846,21 @@ namespace ELuna
 		}
 		lua_pop(L, 1);
 	}
+
+    template<typename T>
+    inline void registerMethod(lua_State* L, const char* name, int (T::*func)(lua_State *L)) {
+        luaL_getmetatable(L, ClassName<T>::getName());
+
+        if (lua_istable(L, -1)) {
+            lua_pushstring(L, name);
+            new (lua_newuserdata(L, sizeof(MethodClass<T>))) MethodClass<T>(name, func);
+            lua_pushcclosure(L, &proxyMethodCall, 1);
+            lua_rawset(L, -3);
+        } else {
+            printf("please register class %s\n", ClassName<T>::getName());
+        }
+        lua_pop(L, 1);
+    }
 
 
 	///////////////////////////////////////////////////////////////////////////////

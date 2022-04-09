@@ -13,6 +13,7 @@ local function test(self)
     self:stopAction("test")
     self:runAction(act)
     self:setPosition({x=0, y=0})
+    self:setVisible(true)
 
     local rotateBg = action.Steps(
             action.Delay(3.0),
@@ -29,6 +30,12 @@ function init(self)
     print("init")
     self.act = test
     self:act()
+
+    --[[self.node = self:add("assets/layouts/test.xml")
+    if self.node ~= nil then
+        local size = self:size()
+        self.node:setPosition({x=size.x*0.5, y=size.y*0.5})
+    end]]--
 end
 
 function release(self)
@@ -41,6 +48,8 @@ end
 
 function key_down(self, key)
     print("key down", key)
+    print("parent", self.bg:parent(), self, self:parent())
+    self.bg:parent():act()
 end
 
 function key_up(self, key)
@@ -72,7 +81,13 @@ function on_assign(self, name, object)
         local size = self:size()
         object:setPosition({x=size.x*0.5, y=size.y*0.5})
         object:setAnchor({x=0.5, y=0.5})
+    elseif name == "layout1" then
+        object:test()
     end
+end
+
+function on_layout(self, parent, name, value)
+    print(self, parent, name, value)
 end
 
 --collectgarbage("collect")

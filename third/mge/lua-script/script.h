@@ -98,6 +98,51 @@ namespace Lua {
             assert(top == lua_gettop(L));
             return result;
         }
+        template<typename RL, typename T1, typename T2>
+        RL Call(Function function, T1 value1, T2 value2) {
+            if (func_refs.empty()) {
+                return RL();
+            }
+            auto const func_ref = func_refs[function];
+            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+                return RL();
+            }
+            auto const top = lua_gettop(L);
+            lua_pushcclosure(L, error_log, 0);
+            int stackTop = lua_gettop(L);
+            ELuna::push2lua_ref(L, func_ref);
+            ELuna::push2lua_ref(L, object_ref);
+            ELuna::push2lua(L, value1);
+            ELuna::push2lua(L, value2);
+            lua_pcall(L, 3, 1, stackTop);
+            RL result = ELuna::read2cpp<RL>(L, -1);
+            lua_settop(L, -3);
+            assert(top == lua_gettop(L));
+            return result;
+        }
+        template<typename RL, typename T1, typename T2, typename T3>
+        RL Call(Function function, T1 value1, T2 value2, T3 value3) {
+            if (func_refs.empty()) {
+                return RL();
+            }
+            auto const func_ref = func_refs[function];
+            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+                return RL();
+            }
+            auto const top = lua_gettop(L);
+            lua_pushcclosure(L, error_log, 0);
+            int stackTop = lua_gettop(L);
+            ELuna::push2lua_ref(L, func_ref);
+            ELuna::push2lua_ref(L, object_ref);
+            ELuna::push2lua(L, value1);
+            ELuna::push2lua(L, value2);
+            ELuna::push2lua(L, value3);
+            lua_pcall(L, 4, 1, stackTop);
+            RL result = ELuna::read2cpp<RL>(L, -1);
+            lua_settop(L, -3);
+            assert(top == lua_gettop(L));
+            return result;
+        }
         template<typename T1, typename T2>
         void Call(Function function, T1 value1, T2 value2) {
             if (func_refs.empty()) {

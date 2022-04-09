@@ -30,18 +30,10 @@ namespace ui {
         typedef std::map<std::string, std::string> Params;
     public:
         virtual ~NodeLoader();
-        virtual void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value);
+        virtual bool onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value);
         virtual Selector onResolveSelector(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value);
     public:
         Node loadNode(mge::Widget* parent, LayoutReader* reader);
-    public:
-        // for param list
-        virtual bool hasParamList() const {
-            return false;
-        }
-        virtual void onParamReceiveBegin(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {}
-        virtual void onParamReceiveEnd(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) {}
-        virtual void onParamReceive(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, Params const& params) {}
     protected:
         virtual Node createNode(mge::Widget* parent, LayoutReader* reader) = 0;
     };
@@ -53,7 +45,7 @@ namespace ui {
     class ImageWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
     protected:
-        void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
+        bool onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
     class WindowWidgetLoader : public NodeLoader {
@@ -63,54 +55,31 @@ namespace ui {
     class TTFLabelLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
     protected:
-        void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
+        bool onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
     class ButtonWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
     protected:
-        void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
+        bool onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
     class MaskWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
     protected:
-        void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
+        bool onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
     class ProgressBarWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
     protected:
-        void onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
+        bool onParseProperty(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, const char* name, const char* value) override;
     };
 
     class RenderTargetWidgetLoader : public NodeLoader {
         Node createNode(mge::Widget* parent, LayoutReader* reader) override;
     };
 
-    class FrameImageWidgetLoader : public NodeLoader {
-        Node createNode(mge::Widget* parent, LayoutReader* reader) override;
-    protected:
-        bool hasParamList() const override;
-        void onParamReceiveBegin(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) override;
-        void onParamReceive(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, Params const& params) override;
-        void onParamReceiveEnd(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) override;
-        typedef std::shared_ptr<mge::Texture> TexturePtr;
-        typedef std::vector<TexturePtr> FrameArray;
-        FrameArray _frames;
-    };
-
-    class FrameAnimationWidgetLoader : public NodeLoader {
-        Node createNode(mge::Widget* parent, LayoutReader* reader) override;
-    protected:
-        bool hasParamList() const override;
-        void onParamReceiveBegin(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) override;
-        void onParamReceive(mge::Widget* node, mge::Widget* parent, LayoutReader* reader, Params const& params) override;
-        void onParamReceiveEnd(mge::Widget* node, mge::Widget* parent, LayoutReader* reader) override;
-        typedef std::shared_ptr<mge::Texture> TexturePtr;
-        typedef std::vector<TexturePtr> FrameArray;
-        FrameArray _frames;
-    };
 }
 
 #endif //SDL2_UI_NODE_LOADER_H

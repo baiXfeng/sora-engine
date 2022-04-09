@@ -11,11 +11,11 @@
 #include "common/mouse.h"
 #include "ELuna.h"
 
-LuaScriptHolder::LuaScriptHolder() {
+LuaScriptHelper::LuaScriptHelper() {
     initScript();
 }
 
-void LuaScriptHolder::loadScript(std::string const& fileName, const char* functionNames[], size_t nameSize) {
+void LuaScriptHelper::loadScript(std::string const& fileName, const char* functionNames[], size_t nameSize) {
     auto data = _game.uilayout().getFileReader()->getData(fileName);
     if (data->empty()) {
         LOG_ERROR("error: Scene::loadScript fail, <%s> not exist.", fileName.c_str());
@@ -24,7 +24,7 @@ void LuaScriptHolder::loadScript(std::string const& fileName, const char* functi
     _script->Load(data, functionNames, nameSize);
 }
 
-void LuaScriptHolder::initScript() {
+void LuaScriptHelper::initScript() {
     if (_script != nullptr) {
         return;
     }
@@ -32,7 +32,7 @@ void LuaScriptHolder::initScript() {
     _script = std::make_shared<Lua::ObjectScript>(state());
 }
 
-LuaScriptHolder::LuaScript& LuaScriptHolder::script() {
+LuaScriptHelper::LuaScript& LuaScriptHelper::script() {
     return _script;
 }
 
@@ -368,13 +368,60 @@ float LuaWidgetHelper::getLuaRotation() {
     return _widget->rotation();
 }
 
+unsigned char LuaWidgetHelper::getLuaOpacity() {
+    return _widget->opacity();
+}
+
+bool LuaWidgetHelper::getLuaVisible() {
+    return _widget->visible();
+}
+
+int LuaWidgetHelper::getWidgetParent(lua_State* L) {
+    if (_widget->parent() == nullptr) {
+        lua_pushnil(L);
+        return 1;
+    }
+    auto lua_script_holder = dynamic_cast<LuaScriptHelper*>(_widget->parent());
+    if (lua_script_holder == nullptr) {
+        lua_pushnil(L);
+        return 1;
+    }
+    ELuna::push2lua_ref(L, lua_script_holder->script()->getRef());
+    return 1;
+}
+
+int LuaWidgetHelper::addWidgetFromLayout(lua_State* L) {
+    auto file = ELuna::read2cpp<const char*>(L, -1);
+    if (file == nullptr) {
+        lua_pushnil(L);
+        return 1;
+    }
+    auto node = _game.uilayout().readNode(file);
+    if (node == nullptr) {
+        lua_pushnil(L);
+        return 1;
+    }
+    auto lua_script_holder = dynamic_cast<LuaScriptHelper*>(node.get());
+    if (lua_script_holder == nullptr) {
+        lua_pushnil(L);
+        return 1;
+    }
+    _widget->addChild(node);
+    node->performLayout();
+    ELuna::push2lua_ref(L, lua_script_holder->script()->getRef());
+    return 1;
+}
+
 //===============================================================================
 
-void NodeLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
+bool NodeLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
     if (strcmp(name, "Script") == 0) {
         node->fast_to<::Node>()->loadScript(value);
+        return true;
+    } else if (ui::NodeLoader::onParseProperty(node, parent, reader, name, value)) {
+        return true;
     } else {
-        NodeLoader::onParseProperty(node, parent, reader, name, value);
+        return node->fast_to<::Node>()->onLayout(parent, reader, name, value);
     }
 }
 
@@ -389,6 +436,7 @@ const char* Node::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "touch_moved",
         "touch_ended",
         "on_assign",
+        "on_layout",
 };
 
 Node::Node(): FingerResponder(this), LuaActionHelper(this), LuaWidgetHelper(this) {
@@ -418,7 +466,7 @@ void Node::loadScript(std::string const& fileName) {
 }
 
 bool Node::onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) {
-    auto lua_script_holder = dynamic_cast<LuaScriptHolder*>(node);
+    auto lua_script_holder = dynamic_cast<LuaScriptHelper*>(node);
     if (lua_script_holder != nullptr) {
         auto& script = lua_script_holder->script();
         _script->CallAssign(OBJECT_FUNCTION_ONASSIGN, name, script->getRef());
@@ -489,6 +537,13 @@ void Node::onTouchEnded(mge::Vector2i const& point) {
     }
 }
 
+bool Node::onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
+    if (_script != nullptr) {
+        return _script->Call<bool>(OBJECT_FUNCTION_ONLAYOUT, parent, name, value);
+    }
+    return false;
+}
+
 //===============================================================================
 
 Layer::Layer() {
@@ -513,6 +568,7 @@ const char* Image::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "init",
         "release",
         "on_assign",
+        "on_layout",
 };
 
 Image::Image(): LuaActionHelper(this), LuaWidgetHelper(this) {
@@ -526,7 +582,7 @@ Image::~Image() {
 }
 
 bool Image::onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) {
-    auto lua_script_holder = dynamic_cast<LuaScriptHolder*>(node);
+    auto lua_script_holder = dynamic_cast<LuaScriptHelper*>(node);
     if (lua_script_holder != nullptr) {
         auto& script = lua_script_holder->script();
         _script->CallAssign(OBJECT_FUNCTION_ONASSIGN, name, script->getRef());
@@ -550,11 +606,21 @@ void Image::onLayoutLoaded() {
     }
 }
 
-void ImageLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
+bool Image::onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
+    if (_script != nullptr) {
+        return _script->Call<bool>(OBJECT_FUNCTION_ONLAYOUT, parent, name, value);
+    }
+    return false;
+}
+
+bool ImageLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
     if (strcmp(name, "Script") == 0) {
         node->fast_to<Image>()->loadScript(value);
+        return true;
+    } else if (ImageWidgetLoader::onParseProperty(node, parent, reader, name, value)) {
+        return true;
     } else {
-        ImageWidgetLoader::onParseProperty(node, parent, reader, name, value);
+        return node->fast_to<Image>()->onLayout(parent, reader, name, value);
     }
 }
 
@@ -564,6 +630,7 @@ const char* Label::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "init",
         "release",
         "on_assign",
+        "on_layout",
 };
 
 Label::Label(): LuaActionHelper(this), LuaWidgetHelper(this) {
@@ -577,7 +644,7 @@ Label::~Label() {
 }
 
 bool Label::onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) {
-    auto lua_script_holder = dynamic_cast<LuaScriptHolder*>(node);
+    auto lua_script_holder = dynamic_cast<LuaScriptHelper*>(node);
     if (lua_script_holder != nullptr) {
         auto& script = lua_script_holder->script();
         _script->CallAssign(OBJECT_FUNCTION_ONASSIGN, name, script->getRef());
@@ -601,11 +668,21 @@ void Label::onLayoutLoaded() {
     }
 }
 
-void LabelLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
+bool Label::onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
+    if (_script != nullptr) {
+        return _script->Call<bool>(OBJECT_FUNCTION_ONLAYOUT, parent, name, value);
+    }
+    return false;
+}
+
+bool LabelLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
     if (strcmp(name, "Script") == 0) {
         node->fast_to<Label>()->loadScript(value);
+        return true;
+    } else if (TTFLabelLoader::onParseProperty(node, parent, reader, name, value)) {
+        return true;
     } else {
-        TTFLabelLoader::onParseProperty(node, parent, reader, name, value);
+        return node->fast_to<Label>()->onLayout(parent, reader, name, value);
     }
 }
 
