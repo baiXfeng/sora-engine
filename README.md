@@ -1,10 +1,6 @@
 # Sora-Engine
 A mini-game engine developed based on SDL2 for homebrew systems.
 
-![avatar](assets/screenshot/screenshot1.png)
-
-![avatar](assets/screenshot/screenshot2.png)
-
 ### Linux install depends:
 ```
 sudo apt install libsdl2-dev libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-gfx-dev
