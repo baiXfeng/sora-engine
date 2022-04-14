@@ -1707,7 +1707,7 @@ namespace ELuna
                     lua_pop(L, 1);
                 }
             } else {
-                printf("dofile error: %s\n", lua_tostring(L, -1));
+                printf("dobuffer error: %s\n", lua_tostring(L, -1));
                 lua_pop(L, 1);
             }
             lua_pop(L, 1);

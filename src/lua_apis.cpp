@@ -9,6 +9,7 @@
 #include "common/log.h"
 #include "lutok3.h"
 #include "lua_objects.h"
+#include "story-script.hpp"
 
 static void registerCFunction(lua_State* L, const char* tableName, const char* funcName) {
     lutok3::State state(L);
@@ -96,6 +97,17 @@ void registerClass(lua_State* L) {
     registerClass<Label>(L, "Label");
 
     ELuna::registerClass<mge::Widget>(L, "Widget", ELuna::constructor<mge::Widget>);
+
+    using namespace story;
+    ELuna::registerClass<LuaStoryScript>(L, "StoryScript", ELuna::constructor<LuaStoryScript, const char*>);
+    ELuna::registerMethod<LuaStoryScript>(L, "load", &LuaStoryScript::load);
+    ELuna::registerMethod<LuaStoryScript, void, int>(L, "back", &LuaStoryScript::back);
+    ELuna::registerMethod<LuaStoryScript, void, int>(L, "next", &LuaStoryScript::next);
+    ELuna::registerMethod<LuaStoryScript, void, const char*>(L, "seek", &LuaStoryScript::seek);
+    ELuna::registerMethod<LuaStoryScript, bool>(L, "end", &LuaStoryScript::isEnd);
+    ELuna::registerMethod<LuaStoryScript, int, lua_State*>(L, "step", &LuaStoryScript::step);
+    ELuna::registerMethod<LuaStoryScript, int>(L, "curr", &LuaStoryScript::current);
+    ELuna::registerMethod<LuaStoryScript, const char*>(L, "file", &LuaStoryScript::file);
 }
 
 void import(const char* luaFileName) {
