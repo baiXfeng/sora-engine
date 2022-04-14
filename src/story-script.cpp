@@ -18,41 +18,17 @@
 
 namespace story {
 
-    static std::vector<std::string> split(std::string const& s, std::string const& delim) {
-        std::vector<std::string> elems;
-        size_t pos = 0;
-        size_t len = s.length();
-        size_t delim_len = delim.length();
-        if (delim_len == 0) return elems;
-        while (pos < len)
-        {
-            int find_pos = s.find(delim, pos);
-            if (find_pos < 0)
-            {
-                elems.push_back(s.substr(pos, len - pos));
-                break;
-            }
-            elems.push_back(s.substr(pos, find_pos - pos));
-            pos = find_pos + delim_len;
+    static std::vector<std::string> split(std::string const& str, std::string const& pat) {
+        using namespace std;
+        vector<string> strvec;
+        string::size_type pos1 = 0, pos2 = str.find(pat);
+        while (string::npos != pos2) {
+            strvec.push_back(str.substr(pos1, pos2 - pos1));
+            pos1 = pos2 + pat.length();
+            pos2 = str.find(pat, pos1);
         }
-        return elems;
-    }
-
-    static void removeInvalidSymbol(std::string& s) {
-        while (true) {
-            if (s.size() == 0) {
-                return;
-            }
-            if (s[0] == ' ' || s[0] == '\t') {
-                s = s.substr(1);
-                continue;
-            }
-            if (s.back() == '\r' || s.back() == '\t') {
-                s = s.substr(0, s.size()-1);
-                continue;
-            }
-            break;
-        }
+        strvec.push_back(str.substr(pos1));
+        return strvec;
     }
 
 //=====================================================================

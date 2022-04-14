@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <memory>
 #include <map>
 #include "ELuna.h"
 

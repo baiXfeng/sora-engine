@@ -242,6 +242,7 @@ public:
     void setTexture(TexturePtr const& texture);
     void setTexture(TexturePtr const& texture, SDL_Rect const& srcrect);
     TexturePtr getTexture() const;
+    void setColor(SDL_Color const& c);
 protected:
     void onDraw(SDL_Renderer* renderer) override;
     void onModifyOpacity(unsigned char opacity) override;

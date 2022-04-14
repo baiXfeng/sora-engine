@@ -659,6 +659,11 @@ Texture::Ptr ImageWidget::getTexture() const {
     return _target->texture();
 }
 
+void ImageWidget::setColor(SDL_Color const& c) {
+    _target->setColor(c.r, c.g, c.b);
+    _target->setOpacity(c.a);
+}
+
 void ImageWidget::onModifyOpacity(unsigned char opacity) {
     _target->setOpacity(opacity);
 }
