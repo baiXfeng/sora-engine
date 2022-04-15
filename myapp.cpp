@@ -12,6 +12,9 @@
 #include "common/file-reader.h"
 #include "src/lua_apis.h"
 #include "src/lua_objects.h"
+#include "src/story-script.hpp"
+#include "src/bmfont.h"
+#include "src/bmflabel.h"
 #include "ELuna.h"
 #include "lutok3.h"
 
@@ -30,6 +33,21 @@ public:
         } else {
             ELuna::doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
         }
+
+        using namespace mge;
+        auto scene = _game.screen().scene_back();
+        auto font = std::make_shared<BMFont>();
+        font->loadFile("assets/fonts/charsets.fnt");
+        auto label = new BMFLabel;
+        label->setFont(font);
+        label->setWidth(960);
+        label->setString("一生一世");
+        label->setPadding({10, 10, 15, 15});
+        label->setSpacing({2, 5});
+        label->draw_at_once();
+        label->getChar(1)->setColor({255, 0, 0, 255});
+        label->getChar(3)->setColor({255, 0, 0, 255});
+        scene->addChild(Widget::Ptr(label));
     }
     void update(float delta) override {
         _game.screen().update(delta);

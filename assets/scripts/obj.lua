@@ -75,7 +75,7 @@ function touch_ended(self, point)
 end
 
 function on_assign(self, name, object)
-    print(name, object)
+    print("obj.lua assign", name, object)
     self[name] = object
     if name == "bg" then
         local size = self:size()

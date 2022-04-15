@@ -1,1 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Layout><Layer Script='assets/scripts/test1.lua'><Image Source='assets/images/title.png'/></Layer></Layout>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Layout><Layer Script='assets/scripts/test1.lua'><Image Source='assets/images/title.png' Assign='image'/></Layer></Layout>

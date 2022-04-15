@@ -1,0 +1,19 @@
+
+*start
+print("1")
+goto("*next")
+
+*second
+print("2")
+
+*next
+print("3")
+
+[[
+local value = "hello world"
+print(value)
+]]
+
+[[
+print(value)
+]]
