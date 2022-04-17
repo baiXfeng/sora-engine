@@ -1082,6 +1082,23 @@ void ScreenWidget::push(Widget::Ptr const& widget) {
     widget->performLayout();
 }
 
+void ScreenWidget::push(Widget::Ptr const& widget, std::function<void(Widget*, Widget*)> const& transform) {
+    _root->addChild(widget);
+    if (auto p = dynamic_cast<ScreenWidgetListener*>(widget.get()); p) {
+        p->onScreenLoaded();
+    }
+    if (_root->children().size() >= 2) {
+        auto child = _root->children()[ _root->children().size() - 2 ];
+        if (auto p = dynamic_cast<ScreenWidgetListener*>(child.get()); p) {
+            p->onScreenSleep();
+        }
+    }
+    Widget* curr = _root->children().size() >= 2 ? _root->children()[ _root->children().size() - 2 ].get() : nullptr;
+    Widget* next = _root->children().back().get();
+    transform(curr, next);
+    widget->performLayout();
+}
+
 void ScreenWidget::replace(Widget::Ptr const& widget) {
     this->pop(false);
     this->push(widget);

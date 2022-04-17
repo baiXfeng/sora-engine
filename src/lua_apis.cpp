@@ -9,6 +9,7 @@
 #include "common/log.h"
 #include "lutok3.h"
 #include "lua_objects.h"
+#include "lua_widget.h"
 #include "story-script.hpp"
 
 static void registerCFunction(lua_State* L, const char* tableName, const char* funcName) {
@@ -91,14 +92,33 @@ void registerClass(lua_State* L, const char* className) {
     ELuna::registerMethod<T>(L, "add", &T::addWidgetFromLayout);
 }
 
-void registerClass(lua_State* L) {
-    registerClass<Layer>(L, "Layer");
-    registerClass<Node>(L, "Node");
-    registerClass<Image>(L, "Image");
-    registerClass<Label>(L, "Label");
+void registerWidget(lua_State* L) {
+    using namespace mge;
+    ELuna::registerClass<Widget>(L, "Widget", ELuna::constructor<Widget>);
+    ELuna::registerMethod<Widget>(L, "runAction", &widgetRunAction);
+    ELuna::registerMethod<Widget>(L, "stopAction", &widgetStopAction);
+    ELuna::registerMethod<Widget>(L, "hasAction", &widgetHasAction);
+    ELuna::registerMethod<Widget>(L, "setPosition", &widgetSetPosition);
+    ELuna::registerMethod<Widget>(L, "position", &widgetGetPosition);
+    ELuna::registerMethod<Widget>(L, "setSize", &widgetSetSize);
+    ELuna::registerMethod<Widget>(L, "size", &widgetGetSize);
+    ELuna::registerMethod<Widget>(L, "setScale", &widgetSetScale);
+    ELuna::registerMethod<Widget>(L, "scale", &widgetGetScale);
+    ELuna::registerMethod<Widget>(L, "setAnchor", &widgetSetAnchor);
+    ELuna::registerMethod<Widget>(L, "anchor", &widgetGetAnchor);
+    ELuna::registerMethod<Widget>(L, "setRotation", &Widget::setRotation);
+    ELuna::registerMethod<Widget>(L, "rotation", &widgetGetRotation);
+    ELuna::registerMethod<Widget>(L, "setOpacity", &Widget::setOpacity);
+    ELuna::registerMethod<Widget>(L, "opacity", &widgetGetOpacity);
+    ELuna::registerMethod<Widget, void, bool>(L, "setVisible", &Widget::setVisible);
+    ELuna::registerMethod<Widget>(L, "visible", &widgetGetVisible);
+    ELuna::registerMethod<Widget, void, bool>(L, "setClip", &Widget::enableClip);
+    ELuna::registerMethod<Widget, void>(L, "removeFromParent", &Widget::removeFromParent);
+    ELuna::registerMethod<Widget>(L, "parent", &widgetGetParent);
+    ELuna::registerMethod<Widget>(L, "add", &widgetAddLayout);
+}
 
-    ELuna::registerClass<mge::Widget>(L, "Widget", ELuna::constructor<mge::Widget>);
-
+void registerStoryScript(lua_State* L) {
     using namespace story;
     ELuna::registerClass<LuaStoryScript>(L, "StoryScript", ELuna::constructor<LuaStoryScript, const char*>);
     ELuna::registerMethod<LuaStoryScript>(L, "load", &LuaStoryScript::load);
@@ -109,6 +129,16 @@ void registerClass(lua_State* L) {
     ELuna::registerMethod<LuaStoryScript, int, lua_State*>(L, "step", &LuaStoryScript::step);
     ELuna::registerMethod<LuaStoryScript, int>(L, "curr", &LuaStoryScript::current);
     ELuna::registerMethod<LuaStoryScript, const char*>(L, "file", &LuaStoryScript::file);
+}
+
+void registerClass(lua_State* L) {
+    registerClass<Layer>(L, "Layer");
+    registerClass<Node>(L, "Node");
+    registerClass<Image>(L, "Image");
+    registerClass<Label>(L, "Label");
+
+    registerStoryScript(L);
+    registerWidget(L);
 }
 
 void import(const char* luaFileName) {

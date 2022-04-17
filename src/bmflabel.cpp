@@ -14,9 +14,6 @@ BMFChar::BMFChar(TexturePtr const& texture, SDL_Rect const& srcrect):ImageWidget
 }
 
 BMFLabel::BMFLabel():_textBox(new Widget), _padding({0, 0, 0, 0}), _dirty(false), _width(0), _visibleCount(0xffff) {
-    /*auto mask = Ptr(new MaskWidget({255, 255, 255, 100}));
-    mask->setName("mask");
-    addChild(mask);*/
     addChild(Ptr(_textBox));
 }
 
@@ -125,7 +122,6 @@ void BMFLabel::refresh() {
 
     this->setSize(size);
     _textBox->setSize(size.x - _padding.left - _padding.right, size.y - _padding.top - _padding.bottom);
-    //find("mask")->setSize(size);
 }
 
 mge_end

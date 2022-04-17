@@ -6,71 +6,9 @@
 #define SDL2_UI_LUA_OBJECTS_H
 
 #include "common/widget.h"
-#include "common/action.h"
 #include "uilayout/ui-layout.h"
-#include "lutok3.h"
-#include "ELuna.h"
-
-namespace Lua {
-    class ObjectScript;
-}
-
-namespace ui {
-    class LayoutReader;
-}
-
-class LuaScriptHelper {
-public:
-    typedef std::shared_ptr<Lua::ObjectScript> LuaScript;
-public:
-    LuaScriptHelper();
-    virtual ~LuaScriptHelper() {}
-public:
-    void loadScript(std::string const& fileName, const char* functionNames[], size_t nameSize);
-    void initScript();
-    LuaScript& script();
-protected:
-    LuaScript _script;
-};
-
-class LuaActionHelper {
-public:
-    LuaActionHelper(mge::Widget* target);
-    virtual ~LuaActionHelper() {}
-public:
-    void runLuaAction(ELuna::LuaTable action);
-    void stopLuaAction(const char* name);
-    bool hasLuaAction(const char* name);
-protected:
-    mge::Widget* _actionTarget;
-};
-
-class LuaWidgetHelper {
-public:
-    LuaWidgetHelper(mge::Widget* target);
-public:
-    void setLuaPosition(ELuna::LuaTable position);
-    ELuna::LuaTable getLuaPosition();
-    void setLuaSize(ELuna::LuaTable size);
-    ELuna::LuaTable getLuaSize();
-    void setLuaScale(ELuna::LuaTable scale);
-    ELuna::LuaTable getLuaScale();
-    void setLuaAnchor(ELuna::LuaTable anchor);
-    ELuna::LuaTable getLuaAnchor();
-public:
-    float getLuaRotation();
-    unsigned char getLuaOpacity();
-    bool getLuaVisible();
-    int getWidgetParent(lua_State* L);
-    int addWidgetFromLayout(lua_State* L);
-public:
-    virtual bool onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
-        return false;
-    }
-protected:
-    mge::Widget* _widget;
-    lua_State* _state;
-};
+#include "lua_action.h"
+#include "lua_widget.h"
 
 class Node : public mge::Widget,
              public mge::FingerResponder,

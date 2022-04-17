@@ -371,6 +371,7 @@ public:
     ScreenWidget();
 public:
     void push(Widget::Ptr const& widget);
+    void push(Widget::Ptr const& widget, std::function<void(Widget*, Widget*)> const& transform);
     void replace(Widget::Ptr const& widget);
     void pop(bool wake_last = true);
     void popAll();
