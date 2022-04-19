@@ -7,6 +7,7 @@
 #include "widget.h"
 #include "mouse.h"
 
+#include <string.h>
 #include <memory>
 #include <iostream>
 #include <SDL.h>

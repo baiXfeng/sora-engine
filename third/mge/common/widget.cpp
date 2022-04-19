@@ -10,6 +10,7 @@
 #include "action.h"
 #include "font.h"
 #include "mouse.h"
+#include <string.h>
 
 mge_begin
 

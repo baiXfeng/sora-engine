@@ -10,7 +10,7 @@
 #define mge_begin namespace mge {
 #define mge_end }
 
-#if defined(WIN32)
+#if defined(WIN32) or defined(_WIN32)
 #define GameApp WinMain
 #elif defined(__PSP__)
 #define GameApp SDL_main
