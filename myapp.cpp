@@ -14,6 +14,7 @@
 #include "src/lua_objects.h"
 #include "ELuna.h"
 #include "lutok3.h"
+#include <unistd.h>
 
 class MyApp : public mge::Game::App {
     lua_State* _state;
@@ -25,6 +26,15 @@ public:
         _game.set<lutok3::State>("lua_state", _state);
 
         auto data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
+
+#if defined(WIN32) or defined(__WIN32__)
+        // 重定向根目录
+        if (data->empty()) {
+            chdir("../../");
+            data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
+        }
+#endif
+
         if (data->empty()) {
             LOG_ERROR("assets/startup.lua not exist.\n");
         } else {
@@ -51,6 +61,9 @@ public:
             ELuna::closeLua(_state);
         }
         LOG_FINI();
+    }
+    std::string windowTitle() override {
+        return "sora-engine";
     }
 };
 

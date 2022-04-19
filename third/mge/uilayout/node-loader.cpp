@@ -132,7 +132,7 @@ namespace ui {
     }
 
     SDL_Color getHexColor(const char* hex_text) {
-        if (strlen(hex_text) < 10 or (hex_text[0] != '0' and hex_text[1] != 'X')) {
+        if (strlen(hex_text) < 6) {
             return {0, 0, 0, 255};
         }
         std::string text(hex_text);
@@ -148,11 +148,19 @@ namespace ui {
         auto hex2int = [char2hex](char first, char second) {
             return Uint8(char2hex(first) * 0x10 + char2hex(second));
         };
+        if (text.length() == 6) {
+            return {
+                    hex2int(text[0], text[1]),
+                    hex2int(text[2], text[3]),
+                    hex2int(text[4], text[5]),
+                    255,
+            };
+        }
         return {
+            hex2int(text[0], text[1]),
             hex2int(text[2], text[3]),
             hex2int(text[4], text[5]),
             hex2int(text[6], text[7]),
-            hex2int(text[8], text[9]),
         };
     }
 
@@ -169,7 +177,7 @@ namespace ui {
             node->fast_to<TTFLabel>()->setString(value);
             return true;
         } else if (strcmp(name, "Color") == 0) {
-            node->fast_to<TTFLabel>()->font()->setColor(getHexColor(value));
+            node->fast_to<TTFLabel>()->setColor(getHexColor(value));
             return true;
         } else {
             return NodeLoader::onParseProperty(node, parent, reader, name, value);

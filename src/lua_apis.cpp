@@ -60,7 +60,7 @@ void openSoraLibs(lua_State* L) {
     _game.uilayout().getLoaderPool()->addLoader<LayerLoader>("Layer");
     _game.uilayout().getLoaderPool()->addLoader<NodeLoader>("Node");
     _game.uilayout().getLoaderPool()->addLoader<ImageLoader>("Image");
-    _game.uilayout().getLoaderPool()->addLoader<LabelLoader>("ttfLabel");
+    _game.uilayout().getLoaderPool()->addLoader<LabelLoader>("Label");
     _game.uilayout().getLoaderPool()->addLoader<ui::MaskWidgetLoader>("Mask");
 
     registerClass(L);

@@ -43,6 +43,9 @@ namespace LOG {
 #if defined(__APPLE__)
 #undef ENABLE_LOG
 #define ENABLE_LOG true
+#elif defined(__WIN32__)
+#undef ENABLE_LOG
+#define ENABLE_LOG true
 #endif
 
 #if not ENABLE_LOG
