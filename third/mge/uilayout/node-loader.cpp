@@ -177,7 +177,7 @@ namespace ui {
             node->fast_to<TTFLabel>()->setString(value);
             return true;
         } else if (strcmp(name, "Color") == 0) {
-            node->fast_to<TTFLabel>()->setColor(getHexColor(value));
+            node->fast_to<TTFLabel>()->font()->setColor(getHexColor(value));
             return true;
         } else {
             return NodeLoader::onParseProperty(node, parent, reader, name, value);

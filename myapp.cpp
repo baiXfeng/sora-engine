@@ -48,6 +48,9 @@ public:
             SDL_SetWindowTitle(_game.window(), name.c_str());
         }
         s.pop();
+
+        // 设置屏幕底色: 白色
+        _game.setRenderColor({255, 255, 255, 255});
     }
     void update(float delta) override {
         _game.screen().update(delta);

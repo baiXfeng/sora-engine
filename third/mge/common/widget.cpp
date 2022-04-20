@@ -1200,9 +1200,7 @@ void TTFLabel::setString(std::string const& s) {
 }
 
 void TTFLabel::setString(std::string const& s, SDL_Color const& color) {
-    if (_font != nullptr) {
-        _font->setColor(color);
-    }
+    setColor(color);
     setString(s);
 }
 
