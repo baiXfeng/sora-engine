@@ -66,6 +66,10 @@ int RenderCopy::opacity() const {
     return _color.a;
 }
 
+SDL_Color const& RenderCopy::color() const {
+    return _color;
+}
+
 void RenderCopy::draw(SDL_Renderer* renderer, Vector2i const& position) {
     if (_texture == nullptr) {
         return;

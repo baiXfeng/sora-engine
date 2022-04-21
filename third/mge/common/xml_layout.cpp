@@ -4,7 +4,7 @@
 
 #include "xml_layout.h"
 #include "file-reader.h"
-#include "uilayout/ui-layout.h"
+#include "ui-layout/ui-layout.h"
 
 mge_begin
 

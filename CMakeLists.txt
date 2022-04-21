@@ -27,7 +27,7 @@ file( GLOB
 		*.c*
 		src/*.c*
 		third/mge/common/*.c*
-		third/mge/uilayout/*.c*
+        third/mge/ui-layout/*.c*
 		third/mge/lua-script/*.c*
 		third/lua/*.c*
 		third/lutok3/src/lutok3/*.c*

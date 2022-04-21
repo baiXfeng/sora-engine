@@ -6,7 +6,7 @@
 #define SDL2_UI_LUA_OBJECTS_H
 
 #include "common/widget.h"
-#include "uilayout/ui-layout.h"
+#include "ui-layout/ui-layout.h"
 #include "lua_action.h"
 #include "lua_widget.h"
 

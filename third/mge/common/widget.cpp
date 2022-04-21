@@ -1195,6 +1195,7 @@ void TTFLabel::setString(std::string const& s) {
     if (_font == nullptr or _s == s) {
         return;
     }
+    _font->setColor( _target->color() );
     setTexture(_font->createWithUTF8(_game.renderer(), s.empty() ? " " : s.c_str()));
     _s = s;
 }

@@ -80,6 +80,7 @@ namespace res {
     TTFont::Ptr find_ttf_font(std::string const& fontName, unsigned int size) {
         for (auto& iter : _ttfFontCache) {
             if (iter->fontPath() == fontName and iter->fontSize() == size) {
+                iter->setColor(255, 255, 255, 255);
                 return iter;
             }
         }
@@ -93,6 +94,7 @@ namespace res {
         }
         ptr = TTFont::New(getAssetsPath() + fileName, size);
         ptr->setFontPath(fileName);
+        ptr->setColor(255, 255, 255, 255);
         _ttfFontCache.push_back(ptr);
         return ptr;
     }

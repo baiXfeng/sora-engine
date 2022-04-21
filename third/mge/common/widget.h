@@ -250,7 +250,7 @@ protected:
     void onModifySize(Vector2f const& size) override;
     void onModifyScale(Vector2f const& scale) override;
     void onModifyAnchor(Vector2f const& anchor) override;
-private:
+protected:
     RenderPtr _target;
 };
 

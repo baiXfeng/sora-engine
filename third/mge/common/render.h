@@ -65,6 +65,7 @@ public:
     void setOpacity(int opacity);
     void setColor(uint8_t r, uint8_t g, uint8_t b);
     int opacity() const;
+    SDL_Color const& color() const;
 public:
     virtual void draw(SDL_Renderer* renderer, Vector2i const& position = {0, 0});
 protected:
