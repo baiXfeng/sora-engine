@@ -167,10 +167,10 @@ void GamePad::onEvent(SDL_Event const& event) {
         case SDL_KEYDOWN:
         {
             int key = event.key.keysym.sym;
-            if (_keyState[key]) {
+            if (_keyboardState[key]) {
                 return;
             }
-            _keyState[key] = true;
+            _keyboardState[key] = true;
             if (_views.size() and not _sleep) {
                 _views.back()->onKeyboardDown(key);
             }
@@ -179,10 +179,10 @@ void GamePad::onEvent(SDL_Event const& event) {
         case SDL_KEYUP:
         {
             int key = event.key.keysym.sym;
-            if (not _keyState[key]) {
+            if (not _keyboardState[key]) {
                 return;
             }
-            _keyState[key] = false;
+            _keyboardState[key] = false;
             if (_views.size() and not _sleep) {
                 _views.back()->onKeyboardUp(key);
             }

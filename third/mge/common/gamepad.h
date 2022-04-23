@@ -76,6 +76,7 @@ private:
     bool _keyboard_event;
     KeyMap _keyValue;
     KeyState _keyState;
+    std::map<int, bool> _keyboardState;
     Vector2i _joyValue[2];
     List _views;
 };

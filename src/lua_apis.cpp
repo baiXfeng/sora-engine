@@ -10,6 +10,7 @@
 #include "lutok3.h"
 #include "lua_objects.h"
 #include "lua_widget.h"
+#include "lua_audio.h"
 #include "story-script.hpp"
 
 static void registerCFunction(lua_State* L, const char* tableName, const char* funcName) {
@@ -158,12 +159,26 @@ void registerStoryScript(lua_State* L) {
     ELuna::registerMethod<LuaStoryScript, const char*>(L, "file", &LuaStoryScript::file);
 }
 
+void registerSoundSystem(lua_State* L) {
+    ELuna::registerClass<LuaMusic>(L, "Music", ELuna::constructor<LuaMusic, const char*>);
+    ELuna::registerMethod<LuaMusic>(L, "load", &LuaMusic::load);
+    ELuna::registerMethod<LuaMusic>(L, "play", &LuaMusic::play);
+    ELuna::registerMethod<LuaMusic>(L, "stop", &LuaMusic::stop);
+
+    ELuna::registerClass<LuaSound>(L, "Sound", ELuna::constructor<LuaSound, const char*>);
+    ELuna::registerMethod<LuaSound>(L, "load", &LuaSound::load);
+    ELuna::registerMethod<LuaSound>(L, "play", &LuaSound::play);
+    ELuna::registerMethod<LuaSound>(L, "pause", &LuaSound::pause);
+    ELuna::registerMethod<LuaSound>(L, "resume", &LuaSound::resume);
+}
+
 void registerClass(lua_State* L) {
     registerClass<Layer>(L, "Layer");
     registerClass<Node>(L, "Node");
     registerClass<Image>(L, "Image");
     registerClass<Label>(L, "Label");
 
+    registerSoundSystem(L);
     registerStoryScript(L);
     registerWidget(L);
 }

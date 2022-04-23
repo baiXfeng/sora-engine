@@ -26,6 +26,9 @@ bool Music::load(std::string const& name) {
 }
 
 int Music::play(int loops) {
+    if (_music == nullptr) {
+        return -1;
+    }
     return Mix_PlayMusic(_music, loops);
 }
 
