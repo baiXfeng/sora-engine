@@ -52,6 +52,9 @@ protected:
     bool onMouseDown(mge::MouseEvent const& event) override;
     void onMouseMotion(mge::MouseEvent const& event) override;
     void onMouseUp(mge::MouseEvent const& event) override;
+    void onMouseEnter(mge::MouseEvent const& event) override;
+    void onMouseExit(mge::MouseEvent const& event) override;
+    bool onMouseWheel(mge::MouseEvent const& event) override;
 };
 
 class NodeLoader : public ui::NodeLoader {

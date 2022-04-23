@@ -115,7 +115,7 @@ bool Node::onMouseDown(mge::MouseEvent const& event) {
         ELuna::LuaTable table(_script->State());
         table.set("x", event.x);
         table.set("y", event.y);
-        table.set("button", event.button);
+        table.set("button", (int)event.button);
         bool ret = _script->Call<bool>(OBJECT_FUNCTION_ONMOUSEDOWN, table);
         return ret;
     }
@@ -127,7 +127,7 @@ void Node::onMouseMotion(mge::MouseEvent const& event) {
         ELuna::LuaTable table(_script->State());
         table.set("x", event.x);
         table.set("y", event.y);
-        table.set("button", event.button);
+        table.set("button", (int)event.button);
         _script->Call(OBJECT_FUNCTION_ONMOUSEMOTION, table);
     }
 }
@@ -137,9 +137,37 @@ void Node::onMouseUp(mge::MouseEvent const& event) {
         ELuna::LuaTable table(_script->State());
         table.set("x", event.x);
         table.set("y", event.y);
-        table.set("button", event.button);
+        table.set("button", (int)event.button);
         _script->Call(OBJECT_FUNCTION_ONMOUSEUP, table);
     }
+}
+
+void Node::onMouseEnter(mge::MouseEvent const& event) {
+    if (_script != nullptr) {
+        ELuna::LuaTable table(_script->State());
+        table.set("x", event.x);
+        table.set("y", event.y);
+        _script->Call(OBJECT_FUNCTION_ONMOUSEENTER, table);
+    }
+}
+
+void Node::onMouseExit(mge::MouseEvent const& event) {
+    if (_script != nullptr) {
+        ELuna::LuaTable table(_script->State());
+        table.set("x", event.x);
+        table.set("y", event.y);
+        _script->Call(OBJECT_FUNCTION_ONMOUSEEXIT, table);
+    }
+}
+
+bool Node::onMouseWheel(mge::MouseEvent const& event) {
+    if (_script != nullptr) {
+        ELuna::LuaTable table(_script->State());
+        table.set("x", event.x);
+        table.set("y", event.y);
+        return _script->Call<bool>(OBJECT_FUNCTION_ONMOUSEWHEEL, table);
+    }
+    return false;
 }
 
 bool Node::onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {

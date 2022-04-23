@@ -21,7 +21,9 @@ public:
     }
     virtual void onMouseMotion(MouseEvent const& event) {}
     virtual void onMouseUp(MouseEvent const& event) {}
-    virtual void onMouseWheel(MouseEvent const& event) {}
+    virtual bool onMouseWheel(MouseEvent const& event) {
+        return false;
+    }
     virtual void onMouseEnter(MouseEvent const& event) {
         _focus = true;
     }

@@ -60,18 +60,23 @@ function joy_stick(self, joyid, point)
     print("joy stick", joyid, point.x, point.y)
 end
 
-function touch_began(self, point)
-    --print("touch began", point.x, point.y)
+function mouse_down(self, state)
+    --print("mouse_down", state.x, state.y)
     self:act()
     return true
 end
 
-function touch_moved(self, point)
-    --print("touch moved", point.x, point.y)
+function mouse_enter(self, state)
+    print("mouse enter", state.x, state.y)
 end
 
-function touch_ended(self, point)
-    --print("touch ended", point.x, point.y)
+function mouse_exit(self, state)
+    print("mouse exit", state.x, state.y)
+end
+
+function mouse_wheel(self, state)
+    print("mouse wheel", state.x, state.y)
+    return true
 end
 
 function on_assign(self, name, object)

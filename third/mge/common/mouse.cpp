@@ -153,7 +153,6 @@ void Mouse::onMouseEvent(SDL_Event const& event) {
         }
             break;
         case SDL_MOUSEMOTION:
-        {
             if (_finger_downed) {
                 auto button = sdlMouseKeyMap[event.button.button];
                 onMouseMotion({button, event.button.x, event.button.y});
@@ -179,15 +178,13 @@ void Mouse::onMouseEvent(SDL_Event const& event) {
                     }
                 }
             }
-        }
             break;
         case SDL_MOUSEWHEEL:
-        {
-            //printf("x = %d, y = %d\n", event.wheel.x, event.wheel.y);
-            if (_focus) {
-                _focus->onMouseWheel({MOUSE_NONE, event.wheel.x, event.wheel.y});
+            if (_focus and _focus->onMouseWheel({MOUSE_NONE, event.wheel.x, event.wheel.y})) {
+                return;
+            } else {
+                // 往下派发滚轮事件直到有响应器处理它
             }
-        }
             break;
         default:
             break;
