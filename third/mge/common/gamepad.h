@@ -46,6 +46,8 @@ public:
     virtual void onButtonDown(int key) {}
     virtual void onButtonUp(int key) {}
     virtual void onJoyAxisMotion(JOYIDX joy_id, int x, int y) {}
+    virtual void onKeyboardDown(int key);
+    virtual void onKeyboardUp(int key);
 };
 
 class Widget;

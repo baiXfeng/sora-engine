@@ -31,6 +31,8 @@ const char* Node::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "key_down",
         "key_up",
         "joy_stick",
+        "keyboard_down",
+        "keyboard_up",
         "mouse_down",
         "mouse_motion",
         "mouse_up",
@@ -193,6 +195,22 @@ bool Layer::onMouseDown(mge::MouseEvent const& event) {
         return true;
     }
     return Node::onMouseDown(event);
+}
+
+void Layer::onKeyboardDown(int key) {
+    if (_script != nullptr and _script->hasFunction(OBJECT_FUNCTION_ONKEYBOARDDOWN)) {
+        _script->Call(OBJECT_FUNCTION_ONKEYBOARDDOWN, key);
+        return;
+    }
+    Node::onKeyboardDown(key);
+}
+
+void Layer::onKeyboardUp(int key) {
+    if (_script != nullptr and _script->hasFunction(OBJECT_FUNCTION_ONKEYBOARDUP)) {
+        _script->Call(OBJECT_FUNCTION_ONKEYBOARDUP, key);
+        return;
+    }
+    Node::onKeyboardUp(key);
 }
 
 //===============================================================================

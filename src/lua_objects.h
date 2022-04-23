@@ -25,6 +25,8 @@ public:
         OBJECT_FUNCTION_ONKEYDOWN,
         OBJECT_FUNCTION_ONKEYUP,
         OBJECT_FUNCTION_ONJOYSTICK,
+        OBJECT_FUNCTION_ONKEYBOARDDOWN,
+        OBJECT_FUNCTION_ONKEYBOARDUP,
         OBJECT_FUNCTION_ONMOUSEDOWN,
         OBJECT_FUNCTION_ONMOUSEMOTION,
         OBJECT_FUNCTION_ONMOUSEUP,
@@ -67,6 +69,8 @@ public:
     Layer();
 private:
     bool onMouseDown(mge::MouseEvent const& event) override;
+    void onKeyboardDown(int key) override;
+    void onKeyboardUp(int key) override;
 };
 
 class LayerLoader : public NodeLoader {

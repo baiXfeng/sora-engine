@@ -60,6 +60,14 @@ function joy_stick(self, joyid, point)
     print("joy stick", joyid, point.x, point.y)
 end
 
+function keyboard_down(self, key)
+    print("keyboard down", key)
+end
+
+function keyboard_up(self, key)
+    print("keyboard up", key)
+end
+
 function mouse_down(self, state)
     --print("mouse_down", state.x, state.y)
     self:act()

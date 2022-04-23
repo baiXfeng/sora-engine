@@ -48,13 +48,39 @@ static void setValueNil(lua_State* L, const char* valueName) {
     setValueNil(lua_state, funcName);                           \
 }
 
-void openSoraLibs(lua_State* L) {
-    ELuna::registerFunction(L, "import", &import);
+template<typename T>
+static void registerMacro(lua_State* L, const char* name, T value) {
+    auto const top = lua_gettop(L);
+    {
+        ELuna::push2lua(L, value);
+        lua_setglobal(L, name);
+    }
+    assert(top == lua_gettop(L));
+}
 
+void openSoraLibs(lua_State* L) {
+
+    // 按键值
+    registerMacro(L, "BUTTON_UP", (int)mge::GamePadListener::UP);
+    registerMacro(L, "BUTTON_DOWN", (int)mge::GamePadListener::DOWN);
+    registerMacro(L, "BUTTON_LEFT", (int)mge::GamePadListener::LEFT);
+    registerMacro(L, "BUTTON_RIGHT", (int)mge::GamePadListener::RIGHT);
+    registerMacro(L, "BUTTON_L1", (int)mge::GamePadListener::L1);
+    registerMacro(L, "BUTTON_R1", (int)mge::GamePadListener::R1);
+    registerMacro(L, "BUTTON_SELECT", (int)mge::GamePadListener::SELECT);
+    registerMacro(L, "BUTTON_START", (int)mge::GamePadListener::START);
+    registerMacro(L, "BUTTON_A", (int)mge::GamePadListener::A);
+    registerMacro(L, "BUTTON_B", (int)mge::GamePadListener::B);
+    registerMacro(L, "BUTTON_X", (int)mge::GamePadListener::X);
+    registerMacro(L, "BUTTON_Y", (int)mge::GamePadListener::Y);
+
+    // 系统
+    ELuna::registerFunction(L, "import", &import);
     registerCFunction2Table(L, "scene", "push", &pushScene);
     registerCFunction2Table(L, "scene", "replace", &replaceScene);
     registerCFunction2Table(L, "scene", "pop", &popScene);
 
+    // UI
     _game.uilayout().setLoader(mge::XmlLayout::LoaderPool(new ui::LoaderPool));
     _game.uilayout().getLoaderPool()->addLoader<ui::WidgetLoader>("Layout");
     _game.uilayout().getLoaderPool()->addLoader<LayerLoader>("Layer");
@@ -63,6 +89,7 @@ void openSoraLibs(lua_State* L) {
     _game.uilayout().getLoaderPool()->addLoader<LabelLoader>("Label");
     _game.uilayout().getLoaderPool()->addLoader<ui::MaskWidgetLoader>("Mask");
 
+    // 类
     registerClass(L);
 }
 

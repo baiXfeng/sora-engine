@@ -189,6 +189,12 @@ namespace Lua {
             }
             assert(top == lua_gettop(L));
         }
+        bool hasFunction(int function) const {
+            if (function < func_refs.size()) {
+                return func_refs[function] != LUA_NOREF;
+            }
+            return false;
+        }
     protected:
         lua_State* L;
         int object_ref;
