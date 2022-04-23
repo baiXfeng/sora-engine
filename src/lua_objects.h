@@ -11,7 +11,7 @@
 #include "lua_widget.h"
 
 class Node : public mge::Widget,
-             public mge::FingerResponder,
+             public mge::MouseResponder,
              public ui::LayoutVariableAssigner,
              public ui::LayoutNodeListener,
              public LuaScriptHelper,
@@ -25,9 +25,12 @@ public:
         OBJECT_FUNCTION_ONKEYDOWN,
         OBJECT_FUNCTION_ONKEYUP,
         OBJECT_FUNCTION_ONJOYSTICK,
-        OBJECT_FUNCTION_ONTOUCHBEGAN,
-        OBJECT_FUNCTION_ONTOUCHMOVED,
-        OBJECT_FUNCTION_ONTOUCHENDED,
+        OBJECT_FUNCTION_ONMOUSEDOWN,
+        OBJECT_FUNCTION_ONMOUSEMOTION,
+        OBJECT_FUNCTION_ONMOUSEUP,
+        OBJECT_FUNCTION_ONMOUSEWHEEL,
+        OBJECT_FUNCTION_ONMOUSEENTER,
+        OBJECT_FUNCTION_ONMOUSEEXIT,
         OBJECT_FUNCTION_ONASSIGN,
         OBJECT_FUNCTION_ONLAYOUT,
         OBJECT_FUNCTION_MAX,
@@ -46,9 +49,9 @@ protected:
     void onButtonDown(int key) override;
     void onButtonUp(int key) override;
     void onJoyAxisMotion(JOYIDX joy_id, int x, int y) override;
-    bool onTouchBegen(mge::Vector2i const& point) override;
-    void onTouchMoved(mge::Vector2i const& point) override;
-    void onTouchEnded(mge::Vector2i const& point) override;
+    bool onMouseDown(mge::MouseEvent const& event) override;
+    void onMouseMotion(mge::MouseEvent const& event) override;
+    void onMouseUp(mge::MouseEvent const& event) override;
 };
 
 class NodeLoader : public ui::NodeLoader {
@@ -60,7 +63,7 @@ class Layer : public Node {
 public:
     Layer();
 private:
-    bool onTouchBegen(mge::Vector2i const& point) override;
+    bool onMouseDown(mge::MouseEvent const& event) override;
 };
 
 class LayerLoader : public NodeLoader {

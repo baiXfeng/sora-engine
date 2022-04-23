@@ -14,7 +14,7 @@
 #include "gamepad.h"
 #include "event.h"
 #include "observer.h"
-#include "finger_responder.h"
+#include "mouse_responder.h"
 
 mge_begin
 
@@ -185,11 +185,11 @@ protected:
     static std::vector<SDL_Rect> _clipStack;
 };
 
-class LayerWidget : public Widget, public FingerResponder {
+class LayerWidget : public Widget, public MouseResponder {
 public:
     LayerWidget();
 protected:
-    bool onTouchBegen(Vector2i const& point) override {
+    bool onMouseDown(MouseEvent const& event) override {
         return true;
     }
 };
@@ -254,7 +254,7 @@ protected:
     RenderPtr _target;
 };
 
-class ButtonWidget : public ImageWidget, public FingerResponder {
+class ButtonWidget : public ImageWidget, public MouseResponder {
 public:
     typedef std::function<void(Widget*)> CallBack;
     typedef std::shared_ptr<Texture> TexturePtr;
@@ -282,9 +282,9 @@ public:
 private:
     void onEnter() override;
     void onExit() override;
-    bool onTouchBegen(Vector2i const& point) override;
-    void onTouchEnded(Vector2i const& point) override;
-    void onTouchMoved(Vector2i const& point) override;
+    bool onMouseDown(MouseEvent const& event) override;
+    void onMouseUp(MouseEvent const& event) override;
+    void onMouseMotion(MouseEvent const& event) override;
 private:
     bool _enable;
     State _state;
@@ -316,9 +316,9 @@ protected:
     void onEnter() override;
     void onModifyScale(Vector2f const& scale) override;
     void onModifySize(Vector2f const& size) override;
-    bool onTouchBegen(Vector2i const& point) override;
-    void onTouchMoved(Vector2i const& point) override;
-    void onTouchEnded(Vector2i const& point) override;
+    bool onMouseDown(MouseEvent const& event) override;
+    void onMouseMotion(MouseEvent const& event) override;
+    void onMouseUp(MouseEvent const& event) override;
 protected:
     float _value;
     Widget* _clipBox;

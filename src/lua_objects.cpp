@@ -31,14 +31,17 @@ const char* Node::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "key_down",
         "key_up",
         "joy_stick",
-        "touch_began",
-        "touch_moved",
-        "touch_ended",
+        "mouse_down",
+        "mouse_motion",
+        "mouse_up",
+        "mouse_wheel",
+        "mouse_enter",
+        "mouse_exit",
         "on_assign",
         "on_layout",
 };
 
-Node::Node(): FingerResponder(this), LuaActionHelper(this), LuaWidgetHelper(this) {
+Node::Node(): MouseResponder(this), LuaActionHelper(this), LuaWidgetHelper(this) {
     connect(ON_ENTER, [this](Widget* sender){
         _game.mouse().add(this);
     });
@@ -107,32 +110,35 @@ void Node::onJoyAxisMotion(JOYIDX joy_id, int x, int y) {
     }
 }
 
-bool Node::onTouchBegen(mge::Vector2i const& point) {
+bool Node::onMouseDown(mge::MouseEvent const& event) {
     if (_script != nullptr) {
         ELuna::LuaTable table(_script->State());
-        table.set("x", point.x);
-        table.set("y", point.y);
-        bool ret = _script->Call<bool>(OBJECT_FUNCTION_ONTOUCHBEGAN, table);
+        table.set("x", event.x);
+        table.set("y", event.y);
+        table.set("button", event.button);
+        bool ret = _script->Call<bool>(OBJECT_FUNCTION_ONMOUSEDOWN, table);
         return ret;
     }
     return false;
 }
 
-void Node::onTouchMoved(mge::Vector2i const& point) {
+void Node::onMouseMotion(mge::MouseEvent const& event) {
     if (_script != nullptr) {
         ELuna::LuaTable table(_script->State());
-        table.set("x", point.x);
-        table.set("y", point.y);
-        _script->Call(OBJECT_FUNCTION_ONTOUCHMOVED, table);
+        table.set("x", event.x);
+        table.set("y", event.y);
+        table.set("button", event.button);
+        _script->Call(OBJECT_FUNCTION_ONMOUSEMOTION, table);
     }
 }
 
-void Node::onTouchEnded(mge::Vector2i const& point) {
+void Node::onMouseUp(mge::MouseEvent const& event) {
     if (_script != nullptr) {
         ELuna::LuaTable table(_script->State());
-        table.set("x", point.x);
-        table.set("y", point.y);
-        _script->Call(OBJECT_FUNCTION_ONTOUCHENDED, table);
+        table.set("x", event.x);
+        table.set("y", event.y);
+        table.set("button", event.button);
+        _script->Call(OBJECT_FUNCTION_ONMOUSEUP, table);
     }
 }
 
@@ -154,11 +160,11 @@ Layer::Layer() {
     });
 }
 
-bool Layer::onTouchBegen(mge::Vector2i const& point) {
+bool Layer::onMouseDown(mge::MouseEvent const& event) {
     if (_script == nullptr) {
         return true;
     }
-    return Node::onTouchBegen(point);
+    return Node::onMouseDown(event);
 }
 
 //===============================================================================

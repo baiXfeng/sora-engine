@@ -513,7 +513,7 @@ void Widget::resumeAllActions() {
 
 //=====================================================================================
 
-LayerWidget::LayerWidget():FingerResponder(this) {
+LayerWidget::LayerWidget(): MouseResponder(this) {
     connect(ON_ENTER, [this](Widget* sender){
         _game.mouse().add(this);
     });
@@ -693,18 +693,18 @@ void ImageWidget::onDraw(SDL_Renderer* renderer) {
 //=====================================================================================
 
 ButtonWidget::ButtonWidget():
-ImageWidget(nullptr),
-FingerResponder(this),
-_state(UNKNOWN),
-_enable(true) {
+        ImageWidget(nullptr),
+        MouseResponder(this),
+        _state(UNKNOWN),
+        _enable(true) {
 
 }
 
 ButtonWidget::ButtonWidget(TexturePtr const& normal, TexturePtr const& pressed, TexturePtr const& disabled):
-ImageWidget(normal),
-FingerResponder(this),
-_state(NORMAL),
-_enable(true) {
+        ImageWidget(normal),
+        MouseResponder(this),
+        _state(NORMAL),
+        _enable(true) {
     setNormalTexture(normal);
     setPressedTexture(pressed);
     setDisabledTexture(disabled);
@@ -774,7 +774,7 @@ void ButtonWidget::onExit() {
     ImageWidget::onExit();
 }
 
-bool ButtonWidget::onTouchBegen(Vector2i const& point) {
+bool ButtonWidget::onMouseDown(MouseEvent const& event) {
     if (!_enable) {
         return false;
     }
@@ -782,16 +782,16 @@ bool ButtonWidget::onTouchBegen(Vector2i const& point) {
     return true;
 }
 
-void ButtonWidget::onTouchEnded(Vector2i const& point) {
+void ButtonWidget::onMouseUp(MouseEvent const& event) {
     setState(NORMAL);
-    if (point.x > 0 and point.x < _global_size.x and point.y > 0 and point.y < _global_size.y) {
+    if (event.x > 0 and event.x < _global_size.x and event.y > 0 and event.y < _global_size.y) {
         if (_selector != nullptr) {
             _selector(this);
         }
     }
 }
 
-void ButtonWidget::onTouchMoved(Vector2i const& point) {
+void ButtonWidget::onMouseMotion(MouseEvent const& event) {
 
 }
 
@@ -903,23 +903,23 @@ void ProgressBarWidget::onModifySize(Vector2f const& size) {
     setValue(_value);
 }
 
-bool ProgressBarWidget::onTouchBegen(Vector2i const& point) {
-    setValue(point.x / global_size().x);
+bool ProgressBarWidget::onMouseDown(MouseEvent const& event) {
+    setValue(event.x / global_size().x);
     if (_selector != nullptr) {
         _selector(this, BEGEN);
     }
     return true;
 }
 
-void ProgressBarWidget::onTouchMoved(Vector2i const& point) {
-    setValue(point.x / global_size().x);
+void ProgressBarWidget::onMouseMotion(MouseEvent const& event) {
+    setValue(event.x / global_size().x);
     if (_selector != nullptr) {
         _selector(this, MOVED);
     }
 }
 
-void ProgressBarWidget::onTouchEnded(Vector2i const& point) {
-    setValue(point.x / global_size().x);
+void ProgressBarWidget::onMouseUp(MouseEvent const& event) {
+    setValue(event.x / global_size().x);
     if (_selector != nullptr) {
         _selector(this, ENDED);
     }
