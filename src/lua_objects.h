@@ -139,4 +139,37 @@ class LabelLoader : public ui::TTFLabelLoader {
     bool onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) override;
 };
 
+class Mask : public mge::MaskWidget,
+              public ui::LayoutVariableAssigner,
+              public ui::LayoutNodeListener,
+              public LuaScriptHelper,
+              public LuaActionHelper,
+              public LuaWidgetHelper {
+public:
+    enum Function {
+        OBJECT_FUNCTION_INIT = 0,
+        OBJECT_FUNCTION_RELEASE,
+        OBJECT_FUNCTION_ONASSIGN,
+        OBJECT_FUNCTION_ONLAYOUT,
+        OBJECT_FUNCTION_MAX,
+    };
+    static const char* FunctionNames[OBJECT_FUNCTION_MAX];
+public:
+    Mask();
+    ~Mask();
+public:
+    void loadScript(std::string const& fileName);
+    bool onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) override;
+    void setColor(ELuna::LuaTable color);
+    ELuna::LuaTable getColor();
+private:
+    bool onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) override;
+    void onLayoutLoaded() override;
+};
+
+class MaskLoader : public ui::MaskWidgetLoader {
+    UI_NODE_LOADER_CREATE(Mask);
+    bool onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) override;
+};
+
 #endif //SDL2_UI_LUA_OBJECTS_H

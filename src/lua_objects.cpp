@@ -337,3 +337,82 @@ bool LabelLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::La
     }
 }
 
+//===============================================================================
+
+const char* Mask::FunctionNames[OBJECT_FUNCTION_MAX] = {
+        "init",
+        "release",
+        "on_assign",
+        "on_layout",
+};
+
+Mask::Mask():MaskWidget({0, 0, 0, 80}), LuaActionHelper(this), LuaWidgetHelper(this) {
+    _script->Ref(this);
+}
+
+Mask::~Mask() {
+    if (_script != nullptr) {
+        _script->Call(OBJECT_FUNCTION_RELEASE);
+    }
+}
+
+bool Mask::onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) {
+    auto lua_script_holder = dynamic_cast<LuaScriptHelper*>(node);
+    if (lua_script_holder != nullptr) {
+        auto& script = lua_script_holder->script();
+        _script->CallAssign(OBJECT_FUNCTION_ONASSIGN, name, script->getRef());
+        return true;
+    }
+    return false;
+}
+
+void Mask::loadScript(std::string const& fileName) {
+    auto data = _game.uilayout().getFileReader()->getData(fileName);
+    if (data->empty()) {
+        LOG_ERROR("error: Mask::loadScript fail, <%s> not exist.", fileName.c_str());
+        return;
+    }
+    _script->Load(data, FunctionNames, OBJECT_FUNCTION_MAX);
+}
+
+void Mask::onLayoutLoaded() {
+    if (_script != nullptr) {
+        _script->Call(OBJECT_FUNCTION_INIT);
+    }
+}
+
+bool Mask::onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
+    if (_script != nullptr) {
+        return _script->Call<bool>(OBJECT_FUNCTION_ONLAYOUT, parent, name, value);
+    }
+    return false;
+}
+
+void Mask::setColor(ELuna::LuaTable color) {
+    MaskWidget::setColor({
+        color.get<int, unsigned char>(1),
+        color.get<int, unsigned char>(2),
+        color.get<int, unsigned char>(3),
+        color.get<int, unsigned char>(4),
+    });
+}
+
+ELuna::LuaTable Mask::getColor() {
+    ELuna::LuaTable table(_state);
+    table.set(1, _color.r);
+    table.set(2, _color.g);
+    table.set(3, _color.b);
+    table.set(4, _color.a);
+    return table;
+}
+
+bool MaskLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
+    if (strcmp(name, "Script") == 0) {
+        node->fast_to<Label>()->loadScript(value);
+        return true;
+    } else if (MaskWidgetLoader::onParseProperty(node, parent, reader, name, value)) {
+        return true;
+    } else {
+        return node->fast_to<Label>()->onLayout(parent, reader, name, value);
+    }
+}

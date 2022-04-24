@@ -88,7 +88,7 @@ void openSoraLibs(lua_State* L) {
     _game.uilayout().getLoaderPool()->addLoader<NodeLoader>("Node");
     _game.uilayout().getLoaderPool()->addLoader<ImageLoader>("Image");
     _game.uilayout().getLoaderPool()->addLoader<LabelLoader>("Label");
-    _game.uilayout().getLoaderPool()->addLoader<ui::MaskWidgetLoader>("Mask");
+    _game.uilayout().getLoaderPool()->addLoader<MaskLoader>("Mask");
 
     // 类
     registerClass(L);
@@ -177,10 +177,14 @@ void registerClass(lua_State* L) {
     registerClass<Node>(L, "Node");
     registerClass<Image>(L, "Image");
     registerClass<Label>(L, "Label");
+    registerClass<Mask>(L, "Mask");
 
     registerSoundSystem(L);
     registerStoryScript(L);
     registerWidget(L);
+
+    ELuna::registerMethod<Mask>(L, "setColor", &Mask::setColor);
+    ELuna::registerMethod<Mask>(L, "color", &Mask::getColor);
 }
 
 void import(const char* luaFileName) {
