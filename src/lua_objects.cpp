@@ -348,6 +348,7 @@ const char* Mask::FunctionNames[OBJECT_FUNCTION_MAX] = {
 
 Mask::Mask():MaskWidget({0, 0, 0, 80}), LuaActionHelper(this), LuaWidgetHelper(this) {
     _script->Ref(this);
+    enableUpdate(true);
 }
 
 Mask::~Mask() {

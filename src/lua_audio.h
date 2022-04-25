@@ -13,11 +13,13 @@ public:
     ~LuaMusic();
 public:
     void load(const char* name);
-    void play(bool restart = true);
+    void play();
+    void pause();
+    void resume();
+    void rewind();
     void stop();
-private:
-    bool _pause;
-    int _channel;
+    void setVolume(int volume);
+    int volume();
 };
 
 class LuaSound : protected mge::SoundEffect {
@@ -29,6 +31,9 @@ public:
     void play();
     void pause();
     void resume();
+    void stop();
+    void setVolume(int volume);
+    int volume();
 };
 
 #endif //SDL2_UI_LUA_AUDIO_H

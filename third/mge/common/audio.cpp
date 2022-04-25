@@ -39,7 +39,7 @@ void Music::free() {
     }
 }
 
-SoundEffect::SoundEffect():_chunk(nullptr), _channel(-0xA) {
+SoundEffect::SoundEffect():_chunk(nullptr), _channel(-1) {
 
 }
 

@@ -163,13 +163,21 @@ void registerSoundSystem(lua_State* L) {
     ELuna::registerClass<LuaMusic>(L, "Music", ELuna::constructor<LuaMusic, const char*>);
     ELuna::registerMethod<LuaMusic>(L, "load", &LuaMusic::load);
     ELuna::registerMethod<LuaMusic>(L, "play", &LuaMusic::play);
+    ELuna::registerMethod<LuaMusic>(L, "pause", &LuaMusic::pause);
+    ELuna::registerMethod<LuaMusic>(L, "resume", &LuaMusic::resume);
+    ELuna::registerMethod<LuaMusic>(L, "rewind", &LuaMusic::rewind);
     ELuna::registerMethod<LuaMusic>(L, "stop", &LuaMusic::stop);
+    ELuna::registerMethod<LuaMusic>(L, "setVolume", &LuaMusic::setVolume);
+    ELuna::registerMethod<LuaMusic>(L, "volume", &LuaMusic::volume);
 
     ELuna::registerClass<LuaSound>(L, "Sound", ELuna::constructor<LuaSound, const char*>);
     ELuna::registerMethod<LuaSound>(L, "load", &LuaSound::load);
     ELuna::registerMethod<LuaSound>(L, "play", &LuaSound::play);
     ELuna::registerMethod<LuaSound>(L, "pause", &LuaSound::pause);
     ELuna::registerMethod<LuaSound>(L, "resume", &LuaSound::resume);
+    ELuna::registerMethod<LuaSound>(L, "stop", &LuaSound::stop);
+    ELuna::registerMethod<LuaSound>(L, "setVolume", &LuaSound::setVolume);
+    ELuna::registerMethod<LuaSound>(L, "volume", &LuaSound::volume);
 }
 
 void registerClass(lua_State* L) {
