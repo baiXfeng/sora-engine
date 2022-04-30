@@ -21,6 +21,8 @@ set(PROJECT_NAME "sdl2-ui")
 set(PROJECT_ELF ${PROJECT_NAME}.elf)
 project(${PROJECT_NAME})
 
+add_subdirectory(third/LuaBridge)
+
 set(BASIC_SOURCE "")
 file( GLOB
 		BASIC_SOURCE
@@ -61,6 +63,7 @@ include_directories(
 		third/a-star/source
 		third/pugixml/src
 		third/pystring
+		third/LuaBridge
 )
 
 if (PSV)

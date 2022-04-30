@@ -59,7 +59,7 @@ namespace story {
         void seek(std::string const& tag);
         void seek(int index);
         void step(ScriptStepFunc func);
-        bool isEnd();
+        bool isEnd() const;
     public:
         void update(float dt);
         void pause(float seconds);
@@ -86,13 +86,16 @@ namespace story {
     class LuaStoryScript : public Script {
     public:
         LuaStoryScript(const char* evName);
+        ~LuaStoryScript();
     public:
         void load(const char* evName);
         void seek(const char* tag);
+        void back(int step = 1);
         void next(int step = 1);
-        int current();
+        int current() const;
         int step(lua_State* L);
-        const char* file();
+        const char* file() const;
+        bool isEnd() const;
     };
 
 }

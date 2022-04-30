@@ -76,7 +76,7 @@ void openSoraLibs(lua_State* L) {
     registerMacro(L, "BUTTON_Y", (int)mge::GamePadListener::Y);
 
     // 系统
-    ELuna::registerFunction(L, "import", &import);
+    //ELuna::registerFunction(L, "import", &import);
     registerCFunction2Table(L, "scene", "push", &pushScene);
     registerCFunction2Table(L, "scene", "replace", &replaceScene);
     registerCFunction2Table(L, "scene", "pop", &popScene);
@@ -147,6 +147,7 @@ void registerWidget(lua_State* L) {
 }
 
 void registerStoryScript(lua_State* L) {
+    /*
     using namespace story;
     ELuna::registerClass<LuaStoryScript>(L, "StoryScript", ELuna::constructor<LuaStoryScript, const char*>);
     ELuna::registerMethod<LuaStoryScript>(L, "load", &LuaStoryScript::load);
@@ -157,6 +158,7 @@ void registerStoryScript(lua_State* L) {
     ELuna::registerMethod<LuaStoryScript, int, lua_State*>(L, "step", &LuaStoryScript::step);
     ELuna::registerMethod<LuaStoryScript, int>(L, "curr", &LuaStoryScript::current);
     ELuna::registerMethod<LuaStoryScript, const char*>(L, "file", &LuaStoryScript::file);
+     */
 }
 
 void registerSoundSystem(lua_State* L) {
@@ -195,21 +197,25 @@ void registerClass(lua_State* L) {
     ELuna::registerMethod<Mask>(L, "color", &Mask::getColor);
 }
 
-void import(const char* luaFileName) {
-    auto& state = _game.get<lutok3::State>("lua_state");
+int import(lua_State* L) {
+    const char* luaFileName = luaL_checkstring(L, -1);
+    if (luaFileName == nullptr) {
+        return 0;
+    }
     auto data = _game.uilayout().getFileReader()->getData(luaFileName);
     if (!data->empty()) {
-        auto ret = luaL_loadbuffer(state(), (char*)data->data(), (size_t)data->size(), data->name().c_str());
+        auto ret = luaL_loadbuffer(L, (char*)data->data(), (size_t)data->size(), data->name().c_str());
         if (ret) {
-            LOG("error: %s\n", lua_tostring(state(), -1));
-            lua_pop(state(), 1);
-        } else if (ret = lua_pcall(state(), 0, 0, 0); ret != 0) {
-            LOG("error: %s\n", lua_tostring(state(), -1));
-            lua_pop(state(), 1);
+            LOG("error: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+        } else if (ret = lua_pcall(L, 0, 0, 0); ret != 0) {
+            LOG("error: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
         }
     } else {
         LOG_ERROR("error: import %s not exist.", luaFileName);
     }
+    return 0;
 }
 
 void pushScene(const char* xmlFileName) {

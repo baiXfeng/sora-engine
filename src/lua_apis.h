@@ -10,7 +10,7 @@
 void openSoraLibs(lua_State* L);
 void registerClass(lua_State* L);
 
-void import(const char* luaFileName);
+int import(lua_State* L);
 void pushScene(const char* xmlFileName);
 void replaceScene(const char* xmlFileName);
 void popScene();

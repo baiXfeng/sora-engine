@@ -191,7 +191,7 @@ namespace story {
         func(line, mIndex++, mName);
     }
 
-    bool Script::isEnd() {
+    bool Script::isEnd() const {
         return mIndex >= mScript.size();
     }
 
@@ -264,6 +264,10 @@ namespace story {
         load(evName);
     }
 
+    LuaStoryScript::~LuaStoryScript() {
+
+    }
+
     void LuaStoryScript::load(const char* evName) {
         auto data = _game.uilayout().getFileReader()->getData(evName);
         if (data->empty()) {
@@ -279,11 +283,15 @@ namespace story {
         Script::seek(tag);
     }
 
+    void LuaStoryScript::back(int step) {
+        Script::seek(getIndex() - step);
+    }
+
     void LuaStoryScript::next(int step) {
         Script::seek(getIndex() + step);
     }
 
-    int LuaStoryScript::current() {
+    int LuaStoryScript::current() const {
         return getIndex();
     }
 
@@ -299,8 +307,12 @@ namespace story {
         return 0;
     }
 
-    const char* LuaStoryScript::file() {
+    const char* LuaStoryScript::file() const {
         return mName.c_str();
+    }
+
+    bool LuaStoryScript::isEnd() const {
+        return Script::isEnd();
     }
 
 }

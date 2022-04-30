@@ -15,6 +15,16 @@
 #include "ELuna.h"
 #include "lutok3.h"
 #include <unistd.h>
+#include "LuaBridge/LuaBridge.h"
+#include "src/lua_audio.h"
+#include "src/story-script.hpp"
+
+class Test {
+public:
+    void print() {
+        printf("hello world.\n");
+    }
+};
 
 class MyApp : public mge::Game::App {
     lua_State* _state;
@@ -22,6 +32,58 @@ public:
     MyApp():_state(ELuna::openLua()) {}
     void init() override {
         LOG_INIT();
+
+        luaL_openlibs(_state);
+
+        luabridge::getGlobalNamespace(_state)
+            .addFunction("import", &import)
+            .beginNamespace("scene")
+                .addFunction("push", &pushScene)
+                .addFunction("replace", &replaceScene)
+                .addFunction("pop", &popScene)
+            .endNamespace()
+            .beginClass<LuaMusic>("Music")
+                .addFunction("load", &LuaMusic::load)
+                .addFunction("play", &LuaMusic::play)
+                .addFunction("pause", &LuaMusic::pause)
+                .addFunction("resume", &LuaMusic::resume)
+                .addFunction("rewind", &LuaMusic::rewind)
+                .addFunction("stop", &LuaMusic::stop)
+                .addFunction("setVolume", &LuaMusic::setVolume)
+                .addFunction("volume", &LuaMusic::volume)
+            .endClass()
+            .beginClass<LuaSound>("Sound")
+                .addFunction("load", &LuaSound::load)
+                .addFunction("play", &LuaSound::play)
+                .addFunction("pause", &LuaSound::pause)
+                .addFunction("resume", &LuaSound::resume)
+                .addFunction("stop", &LuaSound::stop)
+                .addFunction("setVolume", &LuaSound::setVolume)
+                .addFunction("volume", &LuaSound::volume)
+            .endClass()
+            .beginClass<story::LuaStoryScript>("StoryScript")
+                .addFunction("load", &story::LuaStoryScript::load)
+                .addFunction("back", &story::LuaStoryScript::back)
+                .addFunction("next", &story::LuaStoryScript::next)
+                .addFunction("seek", &story::LuaStoryScript::seek)
+                .addFunction("end", &story::LuaStoryScript::isEnd)
+                .addFunction("step", &story::LuaStoryScript::step)
+                .addFunction("current", &story::LuaStoryScript::current)
+                .addFunction("file", &story::LuaStoryScript::file)
+            .endClass();
+
+        luabridge::getGlobalNamespace(_state)
+            .beginNamespace("user")
+                .beginClass<Test>("Test")
+                    .addConstructor<void (*)()>()
+                    .addFunction("print", &Test::print)
+                .endClass()
+            .endNamespace();
+
+        auto data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
+        ELuna::doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
+
+        /*
         openSoraLibs(_state);
         _game.set<lutok3::State>("lua_state", _state);
 
@@ -48,6 +110,7 @@ public:
             SDL_SetWindowTitle(_game.window(), name.c_str());
         }
         s.pop();
+         */
     }
     void update(float delta) override {
         _game.screen().update(delta);

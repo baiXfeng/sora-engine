@@ -1,5 +1,5 @@
 
-_action = {
+local _action = {
 
     Steps = function(...)
         return {
