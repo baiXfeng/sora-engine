@@ -13,47 +13,11 @@
 #include "lua_audio.h"
 #include "story-script.hpp"
 
-static void registerCFunction(lua_State* L, const char* tableName, const char* funcName) {
-    lutok3::State state(L);
-    auto const top = state.getTop();
-    {
-        auto type = state.getGlobal(tableName);
-        if (type == lutok3::Type::Nil) {
-            state.pop();
-            state.newTable();
-            state.setGlobal(tableName);
-            state.getGlobal(tableName);
-        }
-        auto index = state.getTop();
-        state.push(funcName);
-        state.getGlobal(funcName);
-        state.setTable(index);
-        state.pop();
-    }
-    assert(top == state.getTop());
-}
-
-static void setValueNil(lua_State* L, const char* valueName) {
-    auto const top = lua_gettop(L);
-    {
-        lua_pushnil(L);
-        lua_setglobal(L, valueName);
-    }
-    assert(top == lua_gettop(L));
-}
-
-#define registerCFunction2Table(lua_state, tableName, funcName, cfunction) \
-{                                                                \
-    ELuna::registerFunction(lua_state, funcName, cfunction);    \
-    registerCFunction(lua_state, tableName, funcName);          \
-    setValueNil(lua_state, funcName);                           \
-}
-
 template<typename T>
 static void registerMacro(lua_State* L, const char* name, T value) {
     auto const top = lua_gettop(L);
     {
-        ELuna::push2lua(L, value);
+        luabridge::push(L, value);
         lua_setglobal(L, name);
     }
     assert(top == lua_gettop(L));
@@ -74,93 +38,21 @@ void openSoraLibs(lua_State* L) {
     registerMacro(L, "BUTTON_B", (int)mge::GamePadListener::B);
     registerMacro(L, "BUTTON_X", (int)mge::GamePadListener::X);
     registerMacro(L, "BUTTON_Y", (int)mge::GamePadListener::Y);
-
-    // 系统
-    //ELuna::registerFunction(L, "import", &import);
-    registerCFunction2Table(L, "scene", "push", &pushScene);
-    registerCFunction2Table(L, "scene", "replace", &replaceScene);
-    registerCFunction2Table(L, "scene", "pop", &popScene);
-
-    // UI
-    _game.uilayout().setLoader(mge::XmlLayout::LoaderPool(new ui::LoaderPool));
-    _game.uilayout().getLoaderPool()->addLoader<ui::WidgetLoader>("Layout");
-    _game.uilayout().getLoaderPool()->addLoader<LayerLoader>("Layer");
-    _game.uilayout().getLoaderPool()->addLoader<NodeLoader>("Node");
-    _game.uilayout().getLoaderPool()->addLoader<ImageLoader>("Image");
-    _game.uilayout().getLoaderPool()->addLoader<LabelLoader>("Label");
-    _game.uilayout().getLoaderPool()->addLoader<MaskLoader>("Mask");
-
-    // 类
-    registerClass(L);
 }
 
-template<typename T>
-void registerClass(lua_State* L, const char* className) {
-    /*
-    ELuna::registerClass<T>(L, className, ELuna::constructor<T>);
-    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "runAction", &T::runLuaAction);
-    ELuna::registerMethod<T, void, const char*>(L, "stopAction", &T::stopLuaAction);
-    ELuna::registerMethod<T, bool, const char*>(L, "hasAction", &T::hasLuaAction);
-    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "setPosition", &T::setLuaPosition);
-    ELuna::registerMethod<T, ELuna::LuaTable>(L, "position", &T::getLuaPosition);
-    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "setSize", &T::setLuaSize);
-    ELuna::registerMethod<T, ELuna::LuaTable>(L, "size", &T::getLuaSize);
-    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "setScale", &T::setLuaScale);
-    ELuna::registerMethod<T, ELuna::LuaTable>(L, "scale", &T::getLuaScale);
-    ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "setAnchor", &T::setLuaAnchor);
-    ELuna::registerMethod<T, ELuna::LuaTable>(L, "anchor", &T::getLuaAnchor);
-    ELuna::registerMethod<T, void, float>(L, "setRotation", &T::setRotation);
-    ELuna::registerMethod<T, float>(L, "rotation", &T::getLuaRotation);
-    ELuna::registerMethod<T, void, unsigned char>(L, "setOpacity", &T::setOpacity);
-    ELuna::registerMethod<T, unsigned char>(L, "opacity", &T::getLuaOpacity);
-    ELuna::registerMethod<T, void, bool>(L, "setVisible", &T::setVisible);
-    ELuna::registerMethod<T, bool>(L, "visible", &T::getLuaVisible);
-    ELuna::registerMethod<T, void, bool>(L, "setClip", &T::enableClip);
-    ELuna::registerMethod<T, void>(L, "removeFromParent", &T::removeFromParent);
-    ELuna::registerMethod<T>(L, "parent", &T::getWidgetParent);
-    ELuna::registerMethod<T>(L, "add", &T::addWidgetFromLayout);
-     */
-}
-
-void registerWidget(lua_State* L) {
-    /*
-    using namespace mge;
-    ELuna::registerClass<Widget>(L, "Widget", ELuna::constructor<Widget>);
-    ELuna::registerMethod<Widget>(L, "runAction", &widgetRunAction);
-    ELuna::registerMethod<Widget>(L, "stopAction", &widgetStopAction);
-    ELuna::registerMethod<Widget>(L, "hasAction", &widgetHasAction);
-    ELuna::registerMethod<Widget>(L, "setPosition", &widgetSetPosition);
-    ELuna::registerMethod<Widget>(L, "position", &widgetGetPosition);
-    ELuna::registerMethod<Widget>(L, "setSize", &widgetSetSize);
-    ELuna::registerMethod<Widget>(L, "size", &widgetGetSize);
-    ELuna::registerMethod<Widget>(L, "setScale", &widgetSetScale);
-    ELuna::registerMethod<Widget>(L, "scale", &widgetGetScale);
-    ELuna::registerMethod<Widget>(L, "setAnchor", &widgetSetAnchor);
-    ELuna::registerMethod<Widget>(L, "anchor", &widgetGetAnchor);
-    ELuna::registerMethod<Widget>(L, "setRotation", &Widget::setRotation);
-    ELuna::registerMethod<Widget>(L, "rotation", &widgetGetRotation);
-    ELuna::registerMethod<Widget>(L, "setOpacity", &Widget::setOpacity);
-    ELuna::registerMethod<Widget>(L, "opacity", &widgetGetOpacity);
-    ELuna::registerMethod<Widget, void, bool>(L, "setVisible", &Widget::setVisible);
-    ELuna::registerMethod<Widget>(L, "visible", &widgetGetVisible);
-    ELuna::registerMethod<Widget, void, bool>(L, "setClip", &Widget::enableClip);
-    ELuna::registerMethod<Widget, void>(L, "removeFromParent", &Widget::removeFromParent);
-    ELuna::registerMethod<Widget>(L, "parent", &widgetGetParent);
-    ELuna::registerMethod<Widget>(L, "add", &widgetAddLayout);
-     */
-}
-
-void registerClass(lua_State* L) {
-    registerClass<Layer>(L, "Layer");
-    registerClass<Node>(L, "Node");
-    registerClass<Image>(L, "Image");
-    registerClass<Label>(L, "Label");
-    registerClass<Mask>(L, "Mask");
-
-    registerWidget(L);
-
-    ELuna::registerMethod<Mask>(L, "setColor", &Mask::setColor);
-    ELuna::registerMethod<Mask>(L, "color", &Mask::getColor);
+void doBuffer(lua_State *L, const char* buffer, const size_t size, const char* name) {
+    auto const top = lua_gettop(L);
+    {
+        auto ret = luaL_loadbuffer(L, buffer, size, name);
+        if (ret) {
+            LOG_ERROR("error: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+        } else if (ret = lua_pcall(L, 0, 0, 0); ret != 0) {
+            LOG_ERROR("error: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+        }
+    }
+    assert(top == lua_gettop(L));
 }
 
 int import(lua_State* L) {
@@ -170,14 +62,7 @@ int import(lua_State* L) {
     }
     auto data = _game.uilayout().getFileReader()->getData(luaFileName);
     if (!data->empty()) {
-        auto ret = luaL_loadbuffer(L, (char*)data->data(), (size_t)data->size(), data->name().c_str());
-        if (ret) {
-            LOG("error: %s\n", lua_tostring(L, -1));
-            lua_pop(L, 1);
-        } else if (ret = lua_pcall(L, 0, 0, 0); ret != 0) {
-            LOG("error: %s\n", lua_tostring(L, -1));
-            lua_pop(L, 1);
-        }
+        doBuffer(L, (char*)data->data(), data->size(), data->name().c_str());
     } else {
         LOG_ERROR("error: import %s not exist.", luaFileName);
     }

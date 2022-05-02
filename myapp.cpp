@@ -35,10 +35,11 @@ public:
 class MyApp : public mge::Game::App {
     lua_State* _state;
 public:
-    MyApp():_state(ELuna::openLua()) {}
+    MyApp():_state(luaL_newstate()) {}
     void init() override {
         LOG_INIT();
 
+        luaopen_base(_state);
         luaL_openlibs(_state);
 
         std::function<luabridge::LuaRef(mge::Widget*)> widgetGetPosition = [this](mge::Widget* w) {
@@ -130,6 +131,23 @@ public:
                 .addFunction("setClip", &mge::Widget::enableClip)
                 .addFunction("removeFromParent", &mge::Widget::removeFromParent)
                 .addFunction("parent", &mge::Widget::parent)
+            .endClass()
+            .deriveClass<Node, mge::Widget>("Node")
+                .addConstructor<void(*)()>()
+            .endClass()
+            .deriveClass<Layer, Node>("Layer")
+                .addConstructor<void(*)()>()
+            .endClass()
+            .deriveClass<Image, mge::Widget>("Image")
+                .addConstructor<void(*)()>()
+            .endClass()
+            .deriveClass<Label, mge::Widget>("Label")
+                .addConstructor<void(*)()>()
+            .endClass()
+            .deriveClass<Mask, mge::Widget>("Mask")
+                .addConstructor<void(*)()>()
+                .addFunction("setColor", &Mask::setColor)
+                .addFunction("color", &Mask::getColor)
             .endClass();
 
         luabridge::getGlobalNamespace(_state)
@@ -141,9 +159,17 @@ public:
                 .endClass()
             .endNamespace();
 
+        _game.uilayout().setLoader(mge::XmlLayout::LoaderPool(new ui::LoaderPool));
+        _game.uilayout().getLoaderPool()->addLoader<ui::WidgetLoader>("Layout");
+        _game.uilayout().getLoaderPool()->addLoader<LayerLoader>("Layer");
+        _game.uilayout().getLoaderPool()->addLoader<NodeLoader>("Node");
+        _game.uilayout().getLoaderPool()->addLoader<ImageLoader>("Image");
+        _game.uilayout().getLoaderPool()->addLoader<LabelLoader>("Label");
+        _game.uilayout().getLoaderPool()->addLoader<MaskLoader>("Mask");
+
         _game.set<lutok3::State>("lua_state", _state);
         auto data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
-        ELuna::doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
+        doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
 
         /*
         openSoraLibs(_state);
@@ -183,7 +209,8 @@ public:
     void fini() override {
         _game.screen().popAll();
         if (_state != 0) {
-            ELuna::closeLua(_state);
+            lua_close(_state);
+            _state = 0;
         }
         LOG_FINI();
     }

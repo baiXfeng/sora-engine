@@ -29,38 +29,22 @@ namespace Lua {
         return 0;
     }
 
-    ObjectScript::ObjectScript(lua_State* L):L(L), object_ref(LUA_NOREF) {
+    ObjectScript::ObjectScript(lua_State* L):L(L), object(L) {
 
     }
 
     ObjectScript::~ObjectScript() {
-        for (int i = 0; i < func_refs.size(); ++i) {
-            if (func_refs[i] != LUA_NOREF) {
-                luaL_unref(L, LUA_REGISTRYINDEX, func_refs[i]);
-            }
-        }
-        unRef();
+        funcs.clear();
     }
 
-    void ObjectScript::unRef() {
-        if (object_ref != LUA_NOREF) {
-            luaL_unref(L, LUA_REGISTRYINDEX, object_ref);
-            object_ref = LUA_NOREF;
-        }
-    }
-
-    int ObjectScript::getRef() const {
-        return object_ref;
+    luabridge::LuaRef ObjectScript::getRef() const {
+        return object;
     }
 
     void ObjectScript::Load(std::shared_ptr<mge::FileData> const& data, const char* functionNames[], size_t nameSize) {
         // 释放旧引用
-        for (int i = 0; i < func_refs.size(); ++i) {
-            if (func_refs[i] != LUA_NOREF) {
-                luaL_unref(L, LUA_REGISTRYINDEX, func_refs[i]);
-            }
-        }
-        this->func_refs.resize(nameSize, LUA_NOREF);
+        this->funcs.clear();
+        this->funcs.resize(nameSize, L);
         this->func_names.resize(nameSize);
         {
             auto const top = lua_gettop(L);
@@ -84,14 +68,13 @@ namespace Lua {
                     lua_getglobal(L, functionNames[i]);
                     if (not lua_isnil(L, -1)) {
                         if (lua_type(L, -1) == LUA_TFUNCTION) {
-                            func_refs[i] = luaL_ref(L, LUA_REGISTRYINDEX);
+                            this->funcs[i] = luabridge::LuaRef::fromStack(L);
                         } else {
                             LOG_ERROR("error: the global name %s in %s must be function.\n", functionNames[i], data->name().c_str());
                             lua_pop(L, 1);
                             continue;
                         }
                     } else {
-                        func_refs[i] = LUA_NOREF;
                         lua_pop(L, 1);
                     }
                 }

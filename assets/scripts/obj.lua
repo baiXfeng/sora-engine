@@ -21,15 +21,19 @@ local function test(self)
             action.RotationBy(-90, 1)
     )
     rotateBg.name = "rotate"
-    self.bg:stopAction("rotate")
-    self.bg:runAction(rotateBg)
-    self.bg:setRotation(0)
+
+    local m = var[self]
+    m.bg:stopAction("rotate")
+    m.bg:runAction(rotateBg)
+    m.bg:setRotation(0)
 end
 
 function init(self)
     print("init")
-    self.act = test
-    self:act()
+
+    local m = var[self]
+    --m.act = test
+    --m.act(self)
 
     --[[self.node = self:add("assets/layouts/test.xml")
     if self.node ~= nil then
@@ -48,8 +52,6 @@ end
 
 function key_down(self, key)
     print("key down", key)
-    print("parent", self.bg:parent(), self, self:parent())
-    self.bg:parent():act()
 end
 
 function key_up(self, key)
@@ -69,8 +71,7 @@ function keyboard_up(self, key)
 end
 
 function mouse_down(self, state)
-    --print("mouse_down", state.x, state.y)
-    self:act()
+    print("mouse_down", state.x, state.y)
     return true
 end
 
@@ -89,13 +90,15 @@ end
 
 function on_assign(self, name, object)
     print("obj.lua assign", name, object)
-    self[name] = object
+    local m = var[self]
+    m[name] = object
     if name == "bg" then
         local size = self:size()
         object:setPosition({x=size.x*0.5, y=size.y*0.5})
         object:setAnchor({x=0.5, y=0.5})
     elseif name == "layout1" then
-        object:test()
+        local o = var[object]
+        o.test(object)
     end
 end
 

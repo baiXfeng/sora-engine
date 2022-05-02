@@ -5,7 +5,8 @@
 #ifndef SDL2_UI_SCRIPT_H
 #define SDL2_UI_SCRIPT_H
 
-#include "ELuna.h"
+#include "lutok3/lutok3.h"
+#include "LuaBridge/LuaBridge.h"
 #include <memory>
 #include <vector>
 
@@ -26,179 +27,102 @@ namespace Lua {
     public:
         template<typename T>
         void Ref(T* object) {
-            auto const top = lua_gettop(L);
-            {
-                this->unRef();
-                ELuna::push2lua(L, object);
-                object_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-            }
-            assert(top == lua_gettop(L));
+            luabridge::push(L, object);
+            this->object = luabridge::LuaRef::fromStack(L);
         }
-        void unRef();
-        int getRef() const;
+        luabridge::LuaRef getRef() const;
         void Load(std::shared_ptr<mge::FileData> const& data, const char* functionNames[], size_t nameSize);
         void Call(Function function) {
-            if (func_refs.empty()) {
+            if (funcs.empty()) {
                 return;
             }
-            auto const func_ref = func_refs[function];
-            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+            auto func = funcs[function];
+            if (func.isNil() or object.isNil()) {
                 return;
             }
-            auto const top = lua_gettop(L);
-            {
-                lua_pushcclosure(L, error_log, 0);
-                int stackTop = lua_gettop(L);
-                ELuna::push2lua_ref(L, func_ref);
-                ELuna::push2lua_ref(L, object_ref);
-                lua_pcall(L, 1, 1, stackTop);
-                lua_settop(L, -3);
-            }
-            assert(top == lua_gettop(L));
+            func(object);
         }
         template<typename T>
         void Call(Function function, T value) {
-            if (func_refs.empty()) {
+            if (funcs.empty()) {
                 return;
             }
-            auto const func_ref = func_refs[function];
-            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+            auto func = funcs[function];
+            if (func.isNil() or object.isNil()) {
                 return;
             }
-            auto const top = lua_gettop(L);
-            {
-                lua_pushcclosure(L, error_log, 0);
-                int stackTop = lua_gettop(L);
-                ELuna::push2lua_ref(L, func_ref);
-                ELuna::push2lua_ref(L, object_ref);
-                ELuna::push2lua(L, value);
-                lua_pcall(L, 2, 1, stackTop);
-                lua_settop(L, -3);
-            }
-            assert(top == lua_gettop(L));
+            func(object, value);
         }
         template<typename RL, typename T>
         RL Call(Function function, T value) {
-            if (func_refs.empty()) {
+            if (funcs.empty()) {
                 return RL();
             }
-            auto const func_ref = func_refs[function];
-            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+            auto func = funcs[function];
+            if (func.isNil() or object.isNil()) {
                 return RL();
             }
-            auto const top = lua_gettop(L);
-            lua_pushcclosure(L, error_log, 0);
-            int stackTop = lua_gettop(L);
-            ELuna::push2lua_ref(L, func_ref);
-            ELuna::push2lua_ref(L, object_ref);
-            ELuna::push2lua(L, value);
-            lua_pcall(L, 2, 1, stackTop);
-            RL result = ELuna::read2cpp<RL>(L, -1);
-            lua_settop(L, -3);
-            assert(top == lua_gettop(L));
-            return result;
+            auto ret = func(object, value);
+            return ret.template cast<RL>();
         }
         template<typename RL, typename T1, typename T2>
         RL Call(Function function, T1 value1, T2 value2) {
-            if (func_refs.empty()) {
+            if (funcs.empty()) {
                 return RL();
             }
-            auto const func_ref = func_refs[function];
-            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+            auto func = funcs[function];
+            if (func.isNil() or object.isNil()) {
                 return RL();
             }
-            auto const top = lua_gettop(L);
-            lua_pushcclosure(L, error_log, 0);
-            int stackTop = lua_gettop(L);
-            ELuna::push2lua_ref(L, func_ref);
-            ELuna::push2lua_ref(L, object_ref);
-            ELuna::push2lua(L, value1);
-            ELuna::push2lua(L, value2);
-            lua_pcall(L, 3, 1, stackTop);
-            RL result = ELuna::read2cpp<RL>(L, -1);
-            lua_settop(L, -3);
-            assert(top == lua_gettop(L));
-            return result;
+            auto ret = func(object, value1, value2);
+            return ret.template cast<RL>();
         }
         template<typename RL, typename T1, typename T2, typename T3>
         RL Call(Function function, T1 value1, T2 value2, T3 value3) {
-            if (func_refs.empty()) {
+            if (funcs.empty()) {
                 return RL();
             }
-            auto const func_ref = func_refs[function];
-            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+            auto func = funcs[function];
+            if (func.isNil() or object.isNil()) {
                 return RL();
             }
-            auto const top = lua_gettop(L);
-            lua_pushcclosure(L, error_log, 0);
-            int stackTop = lua_gettop(L);
-            ELuna::push2lua_ref(L, func_ref);
-            ELuna::push2lua_ref(L, object_ref);
-            ELuna::push2lua(L, value1);
-            ELuna::push2lua(L, value2);
-            ELuna::push2lua(L, value3);
-            lua_pcall(L, 4, 1, stackTop);
-            RL result = ELuna::read2cpp<RL>(L, -1);
-            lua_settop(L, -3);
-            assert(top == lua_gettop(L));
-            return result;
+            auto ret = func(object, value1, value2, value3);
+            return ret.template cast<RL>();
         }
         template<typename T1, typename T2>
         void Call(Function function, T1 value1, T2 value2) {
-            if (func_refs.empty()) {
+            if (funcs.empty()) {
                 return;
             }
-            auto const func_ref = func_refs[function];
-            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF) {
+            auto func = funcs[function];
+            if (func.isNil() or object.isNil()) {
                 return;
             }
-            auto const top = lua_gettop(L);
-            {
-                lua_pushcclosure(L, error_log, 0);
-                int stackTop = lua_gettop(L);
-                ELuna::push2lua_ref(L, func_ref);
-                ELuna::push2lua_ref(L, object_ref);
-                ELuna::push2lua(L, value1);
-                ELuna::push2lua(L, value2);
-                lua_pcall(L, 3, 1, stackTop);
-                lua_settop(L, -3);
-            }
-            assert(top == lua_gettop(L));
+            func(object, value1, value2);
         }
         lua_State* State() const {
             return L;
         }
-        void CallAssign(Function function, const char* name, int assign_ref) {
-            if (func_refs.empty()) {
+        void CallAssign(Function function, const char* name, luabridge::LuaRef assign) {
+            if (funcs.empty()) {
                 return;
             }
-            auto const func_ref = func_refs[function];
-            if (func_ref == LUA_NOREF or this->object_ref == LUA_NOREF or assign_ref == LUA_NOREF) {
+            auto func = funcs[function];
+            if (func.isNil() or object.isNil() or assign.isNil()) {
                 return;
             }
-            auto const top = lua_gettop(L);
-            {
-                lua_pushcclosure(L, error_log, 0);
-                int stackTop = lua_gettop(L);
-                ELuna::push2lua_ref(L, func_ref);
-                ELuna::push2lua_ref(L, object_ref);
-                ELuna::push2lua(L, name);
-                ELuna::push2lua_ref(L, assign_ref);
-                lua_pcall(L, 3, 1, stackTop);
-                lua_settop(L, -3);
-            }
-            assert(top == lua_gettop(L));
+            func(object, name, assign);
         }
         bool hasFunction(int function) const {
-            if (function < func_refs.size()) {
-                return func_refs[function] != LUA_NOREF;
+            if (function < funcs.size()) {
+                return !funcs[function].isNil();
             }
             return false;
         }
     protected:
         lua_State* L;
-        int object_ref;
-        std::vector<int> func_refs;
+        luabridge::LuaRef object;
+        std::vector<luabridge::LuaRef> funcs;
         std::vector<const char*> func_names;
     };
 }

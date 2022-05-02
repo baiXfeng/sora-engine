@@ -50,7 +50,7 @@ mge::Action::Ptr newSequence(mge::Widget* target, luabridge::LuaRef action) {
             auto key = lua_tostring(L, -1);
             auto value = lua_tostring(L, -2);
             if (lua_type(L, -2) == LUA_TTABLE) {
-                auto table = luabridge::LuaRef::fromStack(L);
+                auto table = luabridge::LuaRef::fromStack(L, -2);
                 auto act = newAction(target, table);
                 if (act != nullptr) {
                     actions.emplace_back(act);

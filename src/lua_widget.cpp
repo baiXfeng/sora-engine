@@ -38,109 +38,6 @@ LuaScriptHelper::LuaScript& LuaScriptHelper::script() {
     return _script;
 }
 
-//===============================================================================
-
-LuaWidgetHelper::LuaWidgetHelper(mge::Widget* target): _widget(target), _state(_game.get<lutok3::State>("lua_state")()) {
-
-}
-
-void LuaWidgetHelper::setLuaPosition(ELuna::LuaTable position) {
-    _widget->setPosition(position.get<const char*, float>("x"), position.get<const char*, float>("y"));
-}
-
-ELuna::LuaTable LuaWidgetHelper::getLuaPosition() {
-    auto const& pos = _widget->position();
-    ELuna::LuaTable table(_state);
-    table.set("x", pos.x);
-    table.set("y", pos.y);
-    return table;
-}
-
-void LuaWidgetHelper::setLuaSize(ELuna::LuaTable size) {
-    _widget->setSize(size.get<const char*, float>("x"), size.get<const char*, float>("y"));
-}
-
-ELuna::LuaTable LuaWidgetHelper::getLuaSize() {
-    auto const& size = _widget->size();
-    ELuna::LuaTable table(_state);
-    table.set("x", size.x);
-    table.set("y", size.y);
-    return table;
-}
-
-void LuaWidgetHelper::setLuaScale(ELuna::LuaTable scale) {
-    _widget->setScale(scale.get<const char*, float>("x"), scale.get<const char*, float>("y"));
-}
-
-ELuna::LuaTable LuaWidgetHelper::getLuaScale() {
-    auto const& scale = _widget->scale();
-    ELuna::LuaTable table(_state);
-    table.set("x", scale.x);
-    table.set("y", scale.y);
-    return table;
-}
-
-void LuaWidgetHelper::setLuaAnchor(ELuna::LuaTable anchor) {
-    _widget->setAnchor(anchor.get<const char*, float>("x"), anchor.get<const char*, float>("y"));
-}
-
-ELuna::LuaTable LuaWidgetHelper::getLuaAnchor() {
-    auto const& anchor = _widget->anchor();
-    ELuna::LuaTable table(_state);
-    table.set("x", anchor.x);
-    table.set("y", anchor.y);
-    return table;
-}
-
-float LuaWidgetHelper::getLuaRotation() {
-    return _widget->rotation();
-}
-
-unsigned char LuaWidgetHelper::getLuaOpacity() {
-    return _widget->opacity();
-}
-
-bool LuaWidgetHelper::getLuaVisible() {
-    return _widget->visible();
-}
-
-int LuaWidgetHelper::getWidgetParent(lua_State* L) {
-    if (_widget->parent() == nullptr) {
-        lua_pushnil(L);
-        return 1;
-    }
-    auto lua_script_holder = dynamic_cast<LuaScriptHelper*>(_widget->parent());
-    if (lua_script_holder == nullptr) {
-        lua_pushnil(L);
-        return 1;
-    }
-    ELuna::push2lua_ref(L, lua_script_holder->script()->getRef());
-    return 1;
-}
-
-int LuaWidgetHelper::addWidgetFromLayout(lua_State* L) {
-    auto file = ELuna::read2cpp<const char*>(L, -1);
-    if (file == nullptr) {
-        lua_pushnil(L);
-        return 1;
-    }
-    auto node = _game.uilayout().readNode(file);
-    if (node == nullptr) {
-        lua_pushnil(L);
-        return 1;
-    }
-    auto lua_script_holder = dynamic_cast<LuaScriptHelper*>(node.get());
-    if (lua_script_holder == nullptr) {
-        lua_pushnil(L);
-        return 1;
-    }
-    _widget->addChild(node);
-    node->performLayout();
-    ELuna::push2lua_ref(L, lua_script_holder->script()->getRef());
-    return 1;
-}
-
-
 int widgetRunAction(mge::Widget* obj, luabridge::LuaRef action) {
     LuaActionHelper helper(obj);
     helper.runLuaAction(action);
@@ -177,7 +74,25 @@ int widgetSetAnchor(mge::Widget* obj, luabridge::LuaRef table) {
     return 0;
 }
 
-int widgetAddLayout(mge::Widget* obj, lua_State* L) {
-    LuaWidgetHelper helper(obj);
-    return helper.addWidgetFromLayout(L);
+int widgetAddLayout(mge::Widget* obj, luabridge::LuaRef xmlFile) {
+    if (!xmlFile.isString()) {
+        lua_pushnil(xmlFile.state());
+        return 1;
+    }
+    const char* file = xmlFile.cast<const char*>();
+    auto node = _game.uilayout().readNode(file);
+    if (node == nullptr) {
+        lua_pushnil(xmlFile.state());
+        return 1;
+    }
+    auto lua_script_holder = dynamic_cast<LuaScriptHelper*>(node.get());
+    if (lua_script_holder == nullptr) {
+        lua_pushnil(xmlFile.state());
+        return 1;
+    }
+    obj->addChild(node);
+    node->performLayout();
+    auto ref = lua_script_holder->script()->getRef();
+    luabridge::push(ref.state(), ref);
+    return 1;
 }

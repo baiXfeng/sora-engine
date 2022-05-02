@@ -9,7 +9,6 @@
 #include "common/file-reader.h"
 #include "common/log.h"
 #include "common/mouse.h"
-#include "ELuna.h"
 
 //===============================================================================
 
@@ -43,7 +42,7 @@ const char* Node::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "on_layout",
 };
 
-Node::Node(): MouseResponder(this), LuaActionHelper(this), LuaWidgetHelper(this) {
+Node::Node(): MouseResponder(this), LuaActionHelper(this) {
     connect(ON_ENTER, [this](Widget* sender){
         _game.mouse().add(this);
     });
@@ -105,19 +104,19 @@ void Node::onButtonUp(int key) {
 
 void Node::onJoyAxisMotion(JOYIDX joy_id, int x, int y) {
     if (_script != nullptr) {
-        ELuna::LuaTable table(_script->State());
-        table.set("x", x);
-        table.set("y", y);
+        auto table = luabridge::LuaRef::newTable(_script->State());
+        table["x"].rawset(x);
+        table["y"].rawset(y);
         _script->Call(OBJECT_FUNCTION_ONJOYSTICK, (int)joy_id, table);
     }
 }
 
 bool Node::onMouseDown(mge::MouseEvent const& event) {
     if (_script != nullptr) {
-        ELuna::LuaTable table(_script->State());
-        table.set("x", event.x);
-        table.set("y", event.y);
-        table.set("button", (int)event.button);
+        auto table = luabridge::LuaRef::newTable(_script->State());
+        table["x"].rawset(event.x);
+        table["y"].rawset(event.y);
+        table["button"].rawset((int)event.button);
         bool ret = _script->Call<bool>(OBJECT_FUNCTION_ONMOUSEDOWN, table);
         return ret;
     }
@@ -126,47 +125,47 @@ bool Node::onMouseDown(mge::MouseEvent const& event) {
 
 void Node::onMouseMotion(mge::MouseEvent const& event) {
     if (_script != nullptr) {
-        ELuna::LuaTable table(_script->State());
-        table.set("x", event.x);
-        table.set("y", event.y);
-        table.set("button", (int)event.button);
+        auto table = luabridge::LuaRef::newTable(_script->State());
+        table["x"].rawset(event.x);
+        table["y"].rawset(event.y);
+        table["button"].rawset((int)event.button);
         _script->Call(OBJECT_FUNCTION_ONMOUSEMOTION, table);
     }
 }
 
 void Node::onMouseUp(mge::MouseEvent const& event) {
     if (_script != nullptr) {
-        ELuna::LuaTable table(_script->State());
-        table.set("x", event.x);
-        table.set("y", event.y);
-        table.set("button", (int)event.button);
+        auto table = luabridge::LuaRef::newTable(_script->State());
+        table["x"].rawset(event.x);
+        table["y"].rawset(event.y);
+        table["button"].rawset((int)event.button);
         _script->Call(OBJECT_FUNCTION_ONMOUSEUP, table);
     }
 }
 
 void Node::onMouseEnter(mge::MouseEvent const& event) {
     if (_script != nullptr) {
-        ELuna::LuaTable table(_script->State());
-        table.set("x", event.x);
-        table.set("y", event.y);
+        auto table = luabridge::LuaRef::newTable(_script->State());
+        table["x"].rawset(event.x);
+        table["y"].rawset(event.y);
         _script->Call(OBJECT_FUNCTION_ONMOUSEENTER, table);
     }
 }
 
 void Node::onMouseExit(mge::MouseEvent const& event) {
     if (_script != nullptr) {
-        ELuna::LuaTable table(_script->State());
-        table.set("x", event.x);
-        table.set("y", event.y);
+        auto table = luabridge::LuaRef::newTable(_script->State());
+        table["x"].rawset(event.x);
+        table["y"].rawset(event.y);
         _script->Call(OBJECT_FUNCTION_ONMOUSEEXIT, table);
     }
 }
 
 bool Node::onMouseWheel(mge::MouseEvent const& event) {
     if (_script != nullptr) {
-        ELuna::LuaTable table(_script->State());
-        table.set("x", event.x);
-        table.set("y", event.y);
+        auto table = luabridge::LuaRef::newTable(_script->State());
+        table["x"].rawset(event.x);
+        table["y"].rawset(event.y);
         return _script->Call<bool>(OBJECT_FUNCTION_ONMOUSEWHEEL, table);
     }
     return false;
@@ -222,7 +221,7 @@ const char* Image::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "on_layout",
 };
 
-Image::Image(): LuaActionHelper(this), LuaWidgetHelper(this) {
+Image::Image(): LuaActionHelper(this) {
     _script->Ref(this);
 }
 
@@ -284,7 +283,7 @@ const char* Label::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "on_layout",
 };
 
-Label::Label(): LuaActionHelper(this), LuaWidgetHelper(this) {
+Label::Label(): LuaActionHelper(this) {
     _script->Ref(this);
 }
 
@@ -346,7 +345,7 @@ const char* Mask::FunctionNames[OBJECT_FUNCTION_MAX] = {
         "on_layout",
 };
 
-Mask::Mask():MaskWidget({0, 0, 0, 80}), LuaActionHelper(this), LuaWidgetHelper(this) {
+Mask::Mask():MaskWidget({0, 0, 0, 80}), LuaActionHelper(this) {
     _script->Ref(this);
     enableUpdate(true);
 }
@@ -399,7 +398,7 @@ void Mask::setColor(luabridge::LuaRef color) {
 }
 
 luabridge::LuaRef Mask::getColor() {
-    auto c = luabridge::LuaRef::newTable(_state);
+    auto c = luabridge::LuaRef::newTable(_script->State());
     c[1].rawset(_color.r);
     c[2].rawset(_color.g);
     c[3].rawset(_color.b);

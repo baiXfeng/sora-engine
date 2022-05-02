@@ -15,6 +15,7 @@
 #include "common/game.h"
 #include "common/xml_layout.h"
 #include "common/log.h"
+#include "lua_apis.h"
 
 namespace story {
 
@@ -303,7 +304,7 @@ namespace story {
         if (line[0] == '*') {
             return 0;
         }
-        ELuna::doBuffer(L, line.data(), line.size(), (mName+" [["+line+"]]").c_str());
+        doBuffer(L, line.data(), line.size(), (mName+" [["+line+"]]").c_str());
         return 0;
     }
 

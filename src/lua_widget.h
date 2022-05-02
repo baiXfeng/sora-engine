@@ -8,7 +8,6 @@
 #include "common/widget.h"
 #include "lutok3/lutok3.h"
 #include "LuaBridge/LuaBridge.h"
-#include "ELuna.h"
 
 namespace Lua {
     class ObjectScript;
@@ -34,29 +33,10 @@ protected:
 
 class LuaWidgetHelper {
 public:
-    LuaWidgetHelper(mge::Widget* target);
-public:
-    void setLuaPosition(ELuna::LuaTable position);
-    ELuna::LuaTable getLuaPosition();
-    void setLuaSize(ELuna::LuaTable size);
-    ELuna::LuaTable getLuaSize();
-    void setLuaScale(ELuna::LuaTable scale);
-    ELuna::LuaTable getLuaScale();
-    void setLuaAnchor(ELuna::LuaTable anchor);
-    ELuna::LuaTable getLuaAnchor();
-public:
-    float getLuaRotation();
-    unsigned char getLuaOpacity();
-    bool getLuaVisible();
-    int getWidgetParent(lua_State* L);
-    int addWidgetFromLayout(lua_State* L);
-public:
+    virtual ~LuaWidgetHelper() {}
     virtual bool onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {
         return false;
     }
-protected:
-    mge::Widget* _widget;
-    lua_State* _state;
 };
 
 int widgetRunAction(mge::Widget* obj, luabridge::LuaRef action);
@@ -68,6 +48,6 @@ int widgetSetSize(mge::Widget* obj, luabridge::LuaRef table);
 int widgetSetScale(mge::Widget* obj, luabridge::LuaRef table);
 int widgetSetAnchor(mge::Widget* obj, luabridge::LuaRef table);
 
-int widgetAddLayout(mge::Widget* obj, lua_State* L);
+int widgetAddLayout(mge::Widget* obj, luabridge::LuaRef xmlFile);
 
 #endif //SDL2_UI_LUA_WIDGET_H
