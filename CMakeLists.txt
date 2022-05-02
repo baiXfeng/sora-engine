@@ -55,7 +55,7 @@ include_directories(
 		third/cereal/include
 		third/eluna/eluna
 		third/lua
-		third/lutok3/src/lutok3
+		third/lutok3/src
 		third/box2d/include
 		third/box2d/src
 		third/random/include

@@ -303,7 +303,7 @@ namespace story {
         if (line[0] == '*') {
             return 0;
         }
-        ELuna::doBuffer(L, line.data(), line.size(), (mName+"-index-"+std::to_string(mIndex)).c_str());
+        ELuna::doBuffer(L, line.data(), line.size(), (mName+" [["+line+"]]").c_str());
         return 0;
     }
 

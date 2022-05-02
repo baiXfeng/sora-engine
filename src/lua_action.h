@@ -6,14 +6,15 @@
 #define SDL2_UI_LUA_ACTION_H
 
 #include "common/widget.h"
-#include "ELuna.h"
+#include "lutok3/lutok3.h"
+#include "LuaBridge/LuaBridge.h"
 
 class LuaActionHelper {
 public:
     LuaActionHelper(mge::Widget* target);
     virtual ~LuaActionHelper() {}
 public:
-    void runLuaAction(ELuna::LuaTable action);
+    void runLuaAction(luabridge::LuaRef action);
     void stopLuaAction(const char* name);
     bool hasLuaAction(const char* name);
 protected:

@@ -7,7 +7,7 @@
 #include "common/xml_layout.h"
 #include "common/file-reader.h"
 #include "common/log.h"
-#include "lutok3.h"
+#include "lutok3/lutok3.h"
 #include "lua_objects.h"
 #include "lua_widget.h"
 #include "lua_audio.h"
@@ -96,6 +96,7 @@ void openSoraLibs(lua_State* L) {
 
 template<typename T>
 void registerClass(lua_State* L, const char* className) {
+    /*
     ELuna::registerClass<T>(L, className, ELuna::constructor<T>);
     ELuna::registerMethod<T, void, ELuna::LuaTable>(L, "runAction", &T::runLuaAction);
     ELuna::registerMethod<T, void, const char*>(L, "stopAction", &T::stopLuaAction);
@@ -118,9 +119,11 @@ void registerClass(lua_State* L, const char* className) {
     ELuna::registerMethod<T, void>(L, "removeFromParent", &T::removeFromParent);
     ELuna::registerMethod<T>(L, "parent", &T::getWidgetParent);
     ELuna::registerMethod<T>(L, "add", &T::addWidgetFromLayout);
+     */
 }
 
 void registerWidget(lua_State* L) {
+    /*
     using namespace mge;
     ELuna::registerClass<Widget>(L, "Widget", ELuna::constructor<Widget>);
     ELuna::registerMethod<Widget>(L, "runAction", &widgetRunAction);
@@ -144,42 +147,7 @@ void registerWidget(lua_State* L) {
     ELuna::registerMethod<Widget, void>(L, "removeFromParent", &Widget::removeFromParent);
     ELuna::registerMethod<Widget>(L, "parent", &widgetGetParent);
     ELuna::registerMethod<Widget>(L, "add", &widgetAddLayout);
-}
-
-void registerStoryScript(lua_State* L) {
-    /*
-    using namespace story;
-    ELuna::registerClass<LuaStoryScript>(L, "StoryScript", ELuna::constructor<LuaStoryScript, const char*>);
-    ELuna::registerMethod<LuaStoryScript>(L, "load", &LuaStoryScript::load);
-    ELuna::registerMethod<LuaStoryScript, void, int>(L, "back", &LuaStoryScript::back);
-    ELuna::registerMethod<LuaStoryScript, void, int>(L, "next", &LuaStoryScript::next);
-    ELuna::registerMethod<LuaStoryScript, void, const char*>(L, "seek", &LuaStoryScript::seek);
-    ELuna::registerMethod<LuaStoryScript, bool>(L, "end", &LuaStoryScript::isEnd);
-    ELuna::registerMethod<LuaStoryScript, int, lua_State*>(L, "step", &LuaStoryScript::step);
-    ELuna::registerMethod<LuaStoryScript, int>(L, "curr", &LuaStoryScript::current);
-    ELuna::registerMethod<LuaStoryScript, const char*>(L, "file", &LuaStoryScript::file);
      */
-}
-
-void registerSoundSystem(lua_State* L) {
-    ELuna::registerClass<LuaMusic>(L, "Music", ELuna::constructor<LuaMusic, const char*>);
-    ELuna::registerMethod<LuaMusic>(L, "load", &LuaMusic::load);
-    ELuna::registerMethod<LuaMusic>(L, "play", &LuaMusic::play);
-    ELuna::registerMethod<LuaMusic>(L, "pause", &LuaMusic::pause);
-    ELuna::registerMethod<LuaMusic>(L, "resume", &LuaMusic::resume);
-    ELuna::registerMethod<LuaMusic>(L, "rewind", &LuaMusic::rewind);
-    ELuna::registerMethod<LuaMusic>(L, "stop", &LuaMusic::stop);
-    ELuna::registerMethod<LuaMusic>(L, "setVolume", &LuaMusic::setVolume);
-    ELuna::registerMethod<LuaMusic>(L, "volume", &LuaMusic::volume);
-
-    ELuna::registerClass<LuaSound>(L, "Sound", ELuna::constructor<LuaSound, const char*>);
-    ELuna::registerMethod<LuaSound>(L, "load", &LuaSound::load);
-    ELuna::registerMethod<LuaSound>(L, "play", &LuaSound::play);
-    ELuna::registerMethod<LuaSound>(L, "pause", &LuaSound::pause);
-    ELuna::registerMethod<LuaSound>(L, "resume", &LuaSound::resume);
-    ELuna::registerMethod<LuaSound>(L, "stop", &LuaSound::stop);
-    ELuna::registerMethod<LuaSound>(L, "setVolume", &LuaSound::setVolume);
-    ELuna::registerMethod<LuaSound>(L, "volume", &LuaSound::volume);
 }
 
 void registerClass(lua_State* L) {
@@ -189,8 +157,6 @@ void registerClass(lua_State* L) {
     registerClass<Label>(L, "Label");
     registerClass<Mask>(L, "Mask");
 
-    registerSoundSystem(L);
-    registerStoryScript(L);
     registerWidget(L);
 
     ELuna::registerMethod<Mask>(L, "setColor", &Mask::setColor);

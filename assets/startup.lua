@@ -5,31 +5,13 @@ import("assets/lualibs/variable.lua")
 
 scene.push("assets/layouts/title.xml")
 
-local _var = {}
-local mt = {
-    __index = function(t, k)
-        local ret = rawget(t, k)
-        if ret == nil and type(k) == "userdata" then
-            ret = {}
-            rawset(t, k, ret)
-        end
-        return ret
-    end
-}
-setmetatable(_var, mt)
-var = _var
+--local test = user.Test()
+--test:testTable({x=100, y=0.123})
 
-local n1 = user.Test()
-
-local m = var[n1]
-print(m)
-m.value = "hello world"
-print(m.value)
-
-var[n1] = nil
-print(rawget(var, n1))
-
-n1:print()
+local n = Widget()
+n:setPosition({x=100, y=200})
+local pos = n:position()
+print(pos, pos.x, pos.y, n:parent())
 
 --[[
 print(n1, n1.value)

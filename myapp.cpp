@@ -12,8 +12,7 @@
 #include "common/file-reader.h"
 #include "src/lua_apis.h"
 #include "src/lua_objects.h"
-#include "ELuna.h"
-#include "lutok3.h"
+#include "lutok3/lutok3.h"
 #include <unistd.h>
 #include "LuaBridge/LuaBridge.h"
 #include "src/lua_audio.h"
@@ -23,6 +22,13 @@ class Test {
 public:
     void print() {
         printf("hello world.\n");
+    }
+    void testTable(luabridge::LuaRef table) {
+        //printf("%s\n", lua_typename(L, -1));
+        //auto table = luabridge::LuaRef::fromStack(L, -1);
+        float x = table["x"].cast<float>();
+        float y = table["y"].cast<float>();
+        printf("x = %f, y = %f\n", x, y);
     }
 };
 
@@ -35,6 +41,34 @@ public:
 
         luaL_openlibs(_state);
 
+        std::function<luabridge::LuaRef(mge::Widget*)> widgetGetPosition = [this](mge::Widget* w) {
+            auto table = luabridge::newTable(_state);
+            table["x"].rawset(w->position().x);
+            table["y"].rawset(w->position().y);
+            return table;
+        };
+
+        std::function<luabridge::LuaRef(mge::Widget*)> widgetGetSize = [this](mge::Widget* w) {
+            auto table = luabridge::newTable(_state);
+            table["x"].rawset(w->size().x);
+            table["y"].rawset(w->size().y);
+            return table;
+        };
+
+        std::function<luabridge::LuaRef(mge::Widget*)> widgetGetScale = [this](mge::Widget* w) {
+            auto table = luabridge::newTable(_state);
+            table["x"].rawset(w->scale().x);
+            table["y"].rawset(w->scale().y);
+            return table;
+        };
+
+        std::function<luabridge::LuaRef(mge::Widget*)> widgetGetAnchor = [this](mge::Widget* w) {
+            auto table = luabridge::newTable(_state);
+            table["x"].rawset(w->anchor().x);
+            table["y"].rawset(w->anchor().y);
+            return table;
+        };
+
         luabridge::getGlobalNamespace(_state)
             .addFunction("import", &import)
             .beginNamespace("scene")
@@ -43,6 +77,7 @@ public:
                 .addFunction("pop", &popScene)
             .endNamespace()
             .beginClass<LuaMusic>("Music")
+                .addConstructor<void(*)(const char*)>()
                 .addFunction("load", &LuaMusic::load)
                 .addFunction("play", &LuaMusic::play)
                 .addFunction("pause", &LuaMusic::pause)
@@ -53,6 +88,7 @@ public:
                 .addFunction("volume", &LuaMusic::volume)
             .endClass()
             .beginClass<LuaSound>("Sound")
+                .addConstructor<void(*)(const char*)>()
                 .addFunction("load", &LuaSound::load)
                 .addFunction("play", &LuaSound::play)
                 .addFunction("pause", &LuaSound::pause)
@@ -62,21 +98,46 @@ public:
                 .addFunction("volume", &LuaSound::volume)
             .endClass()
             .beginClass<story::LuaStoryScript>("StoryScript")
+                .addConstructor<void(*)(const char*)>()
                 .addFunction("load", &story::LuaStoryScript::load)
                 .addFunction("back", &story::LuaStoryScript::back)
                 .addFunction("next", &story::LuaStoryScript::next)
                 .addFunction("seek", &story::LuaStoryScript::seek)
-                .addFunction("end", &story::LuaStoryScript::isEnd)
+                .addFunction("isEnd", &story::LuaStoryScript::isEnd)
                 .addFunction("step", &story::LuaStoryScript::step)
                 .addFunction("current", &story::LuaStoryScript::current)
                 .addFunction("file", &story::LuaStoryScript::file)
+            .endClass()
+            .beginClass<mge::Widget>("Widget")
+                .addConstructor<void(*)()>()
+                .addFunction("runAction", &widgetRunAction)
+                .addFunction("stopAction", &widgetStopAction)
+                .addFunction("hasAction", &widgetHasAction)
+                .addFunction("setPosition", &widgetSetPosition)
+                .addFunction("position", std::move(widgetGetPosition))
+                .addFunction("setSize", &widgetSetSize)
+                .addFunction("size", std::move(widgetGetSize))
+                .addFunction("setScale", &widgetSetScale)
+                .addFunction("scale", std::move(widgetGetScale))
+                .addFunction("setAnchor", &widgetSetAnchor)
+                .addFunction("anchor", std::move(widgetGetAnchor))
+                .addFunction("setRotation", &mge::Widget::setRotation)
+                .addFunction("rotation", &mge::Widget::rotation)
+                .addFunction("setOpacity", &mge::Widget::setOpacity)
+                .addFunction("opacity", &mge::Widget::opacity)
+                .addFunction("setVisible", &mge::Widget::setVisible)
+                .addFunction("visible", &mge::Widget::visible)
+                .addFunction("setClip", &mge::Widget::enableClip)
+                .addFunction("removeFromParent", &mge::Widget::removeFromParent)
+                .addFunction("parent", &mge::Widget::parent)
             .endClass();
 
         luabridge::getGlobalNamespace(_state)
             .beginNamespace("user")
                 .beginClass<Test>("Test")
-                    .addConstructor<void (*)()>()
+                    .addConstructor<void(*)()>()
                     .addFunction("print", &Test::print)
+                    .addFunction("testTable", &Test::testTable)
                 .endClass()
             .endNamespace();
 

@@ -6,6 +6,8 @@
 #define SDL2_UI_LUA_WIDGET_H
 
 #include "common/widget.h"
+#include "lutok3/lutok3.h"
+#include "LuaBridge/LuaBridge.h"
 #include "ELuna.h"
 
 namespace Lua {
@@ -57,23 +59,15 @@ protected:
     lua_State* _state;
 };
 
-int widgetRunAction(mge::Widget* obj, lua_State* L);
-int widgetStopAction(mge::Widget* obj, lua_State* L);
-int widgetHasAction(mge::Widget* obj, lua_State* L);
+int widgetRunAction(mge::Widget* obj, luabridge::LuaRef action);
+int widgetStopAction(mge::Widget* obj, const char* name);
+int widgetHasAction(mge::Widget* obj, luabridge::LuaRef name);
 
-int widgetSetPosition(mge::Widget* obj, lua_State* L);
-int widgetGetPosition(mge::Widget* obj, lua_State* L);
-int widgetSetSize(mge::Widget* obj, lua_State* L);
-int widgetGetSize(mge::Widget* obj, lua_State* L);
-int widgetSetScale(mge::Widget* obj, lua_State* L);
-int widgetGetScale(mge::Widget* obj, lua_State* L);
-int widgetSetAnchor(mge::Widget* obj, lua_State* L);
-int widgetGetAnchor(mge::Widget* obj, lua_State* L);
-int widgetGetRotation(mge::Widget* obj, lua_State* L);
-int widgetGetOpacity(mge::Widget* obj, lua_State* L);
+int widgetSetPosition(mge::Widget* obj, luabridge::LuaRef table);
+int widgetSetSize(mge::Widget* obj, luabridge::LuaRef table);
+int widgetSetScale(mge::Widget* obj, luabridge::LuaRef table);
+int widgetSetAnchor(mge::Widget* obj, luabridge::LuaRef table);
 
-int widgetGetVisible(mge::Widget* obj, lua_State* L);
-int widgetGetParent(mge::Widget* obj, lua_State* L);
 int widgetAddLayout(mge::Widget* obj, lua_State* L);
 
 #endif //SDL2_UI_LUA_WIDGET_H

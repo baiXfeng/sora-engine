@@ -9,7 +9,7 @@
 #include "common/xml_layout.h"
 #include "common/file-reader.h"
 #include "lua-script/script.h"
-#include "lutok3.h"
+#include "lutok3/lutok3.h"
 
 //===============================================================================
 
@@ -141,100 +141,40 @@ int LuaWidgetHelper::addWidgetFromLayout(lua_State* L) {
 }
 
 
-int widgetRunAction(mge::Widget* obj, lua_State* L) {
-    ELuna::LuaTable action(L, -1);
+int widgetRunAction(mge::Widget* obj, luabridge::LuaRef action) {
     LuaActionHelper helper(obj);
     helper.runLuaAction(action);
     return 0;
 }
 
-int widgetStopAction(mge::Widget* obj, lua_State* L) {
-    auto name = lua_tostring(L, -1);
-    if (name) {
-        obj->stopAction(name);
-    }
+int widgetStopAction(mge::Widget* obj, const char* name) {
+    obj->stopAction(name);
     return 0;
 }
 
-int widgetHasAction(mge::Widget* obj, lua_State* L) {
-    auto name = lua_tostring(L, -1);
-    if (name) {
-        ELuna::push2lua(L, obj->hasAction(name));
-        return 1;
-    }
+int widgetHasAction(mge::Widget* obj, luabridge::LuaRef name) {
+    lua_pushboolean(name.state(), name.cast<bool>());
+    return 1;
+}
+
+int widgetSetPosition(mge::Widget* obj, luabridge::LuaRef table) {
+    obj->setPosition(table["x"].cast<float>(), table["y"].cast<float>());
     return 0;
 }
 
-int widgetSetPosition(mge::Widget* obj, lua_State* L) {
-    ELuna::LuaTable table(L, -1);
-    LuaWidgetHelper helper(obj);
-    helper.setLuaPosition(table);
+int widgetSetSize(mge::Widget* obj, luabridge::LuaRef table) {
+    obj->setSize(table["x"].cast<float>(), table["y"].cast<float>());
     return 0;
 }
 
-int widgetGetPosition(mge::Widget* obj, lua_State* L) {
-    LuaWidgetHelper helper(obj);
-    ELuna::push2lua(L, helper.getLuaPosition());
-    return 1;
-}
-
-int widgetSetSize(mge::Widget* obj, lua_State* L) {
-    ELuna::LuaTable table(L, -1);
-    LuaWidgetHelper helper(obj);
-    helper.setLuaSize(table);
+int widgetSetScale(mge::Widget* obj, luabridge::LuaRef table) {
+    obj->setScale(table["x"].cast<float>(), table["y"].cast<float>());
     return 0;
 }
 
-int widgetGetSize(mge::Widget* obj, lua_State* L) {
-    LuaWidgetHelper helper(obj);
-    ELuna::push2lua(L, helper.getLuaSize());
-    return 1;
-}
-
-int widgetSetScale(mge::Widget* obj, lua_State* L) {
-    ELuna::LuaTable table(L, -1);
-    LuaWidgetHelper helper(obj);
-    helper.setLuaScale(table);
+int widgetSetAnchor(mge::Widget* obj, luabridge::LuaRef table) {
+    obj->setAnchor(table["x"].cast<float>(), table["y"].cast<float>());
     return 0;
-}
-
-int widgetGetScale(mge::Widget* obj, lua_State* L) {
-    LuaWidgetHelper helper(obj);
-    ELuna::push2lua(L, helper.getLuaScale());
-    return 1;
-}
-
-int widgetSetAnchor(mge::Widget* obj, lua_State* L) {
-    ELuna::LuaTable table(L, -1);
-    LuaWidgetHelper helper(obj);
-    helper.setLuaAnchor(table);
-    return 0;
-}
-
-int widgetGetAnchor(mge::Widget* obj, lua_State* L) {
-    LuaWidgetHelper helper(obj);
-    ELuna::push2lua(L, helper.getLuaAnchor());
-    return 1;
-}
-
-int widgetGetRotation(mge::Widget* obj, lua_State* L) {
-    ELuna::push2lua(L, obj->rotation());
-    return 1;
-}
-
-int widgetGetOpacity(mge::Widget* obj, lua_State* L) {
-    ELuna::push2lua(L, obj->opacity());
-    return 1;
-}
-
-int widgetGetVisible(mge::Widget* obj, lua_State* L) {
-    ELuna::push2lua(L, obj->visible());
-    return 1;
-}
-
-int widgetGetParent(mge::Widget* obj, lua_State* L) {
-    ELuna::push2lua(L, obj->parent());
-    return 1;
 }
 
 int widgetAddLayout(mge::Widget* obj, lua_State* L) {
