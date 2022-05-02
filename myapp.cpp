@@ -141,6 +141,7 @@ public:
                 .endClass()
             .endNamespace();
 
+        _game.set<lutok3::State>("lua_state", _state);
         auto data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
         ELuna::doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
 

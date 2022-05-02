@@ -389,22 +389,22 @@ bool Mask::onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* n
     return false;
 }
 
-void Mask::setColor(ELuna::LuaTable color) {
+void Mask::setColor(luabridge::LuaRef color) {
     MaskWidget::setColor({
-        color.get<int, unsigned char>(1),
-        color.get<int, unsigned char>(2),
-        color.get<int, unsigned char>(3),
-        color.get<int, unsigned char>(4),
+        color[1].cast<unsigned char>(),
+        color[2].cast<unsigned char>(),
+        color[3].cast<unsigned char>(),
+        color[4].cast<unsigned char>(),
     });
 }
 
-ELuna::LuaTable Mask::getColor() {
-    ELuna::LuaTable table(_state);
-    table.set(1, _color.r);
-    table.set(2, _color.g);
-    table.set(3, _color.b);
-    table.set(4, _color.a);
-    return table;
+luabridge::LuaRef Mask::getColor() {
+    auto c = luabridge::LuaRef::newTable(_state);
+    c[1].rawset(_color.r);
+    c[2].rawset(_color.g);
+    c[3].rawset(_color.b);
+    c[4].rawset(_color.a);
+    return c;
 }
 
 bool MaskLoader::onParseProperty(mge::Widget* node, mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) {

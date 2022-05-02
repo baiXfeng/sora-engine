@@ -160,8 +160,8 @@ public:
 public:
     void loadScript(std::string const& fileName);
     bool onLayout(mge::Widget* parent, ui::LayoutReader* reader, const char* name, const char* value) override;
-    void setColor(ELuna::LuaTable color);
-    ELuna::LuaTable getColor();
+    void setColor(luabridge::LuaRef color);
+    luabridge::LuaRef getColor();
 private:
     bool onAssignMember(mge::Widget* target, const char* name, mge::Widget* node) override;
     void onLayoutLoaded() override;
