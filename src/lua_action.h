@@ -15,8 +15,6 @@ public:
     virtual ~LuaActionHelper() {}
 public:
     void runLuaAction(luabridge::LuaRef action);
-    void stopLuaAction(const char* name);
-    bool hasLuaAction(const char* name);
 protected:
     mge::Widget* _actionTarget;
 };

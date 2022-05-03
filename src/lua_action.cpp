@@ -38,31 +38,18 @@ static std::map<std::string, std::function<mge::Action::Ptr(mge::Widget*, luabri
 
 mge::Action::Ptr newSequence(mge::Widget* target, luabridge::LuaRef action) {
     mge::Sequence::Actions actions;
-    {
-        auto actions_table = action["actions"];
-        auto L = action.state();
-        auto const top = lua_gettop(L);
-        action.push();
-        auto const index = lua_gettop(L);
-        lua_pushnil(L);
-        while (lua_next(L, index)) {
-            lua_pushvalue(L, -2);
-            auto key = lua_tostring(L, -1);
-            auto value = lua_tostring(L, -2);
-            if (lua_type(L, -2) == LUA_TTABLE) {
-                auto table = luabridge::LuaRef::fromStack(L, -2);
-                auto act = newAction(target, table);
-                if (act != nullptr) {
-                    actions.emplace_back(act);
-                }
-            } else {
-                lua_pop(L, 2);
+    auto array = action["actions"];
+    int index = 1;
+    while (1) {
+        if (auto table = array[index]; !table.isNil()) {
+            auto a = newAction(target, table);
+            if (a != nullptr) {
+                actions.emplace_back(a);
+                ++index;
                 continue;
             }
-            lua_pop(L, 1);
         }
-        lua_pop(L, 1);
-        assert(top == lua_gettop(L));
+        break;
     }
     return mge::Action::Ptr(new mge::Sequence(actions));
 }
@@ -240,12 +227,4 @@ void LuaActionHelper::runLuaAction(luabridge::LuaRef action) {
     if (_action != nullptr) {
         _actionTarget->runAction(_action);
     }
-}
-
-void LuaActionHelper::stopLuaAction(const char* name) {
-    _actionTarget->stopAction(name);
-}
-
-bool LuaActionHelper::hasLuaAction(const char* name) {
-    return _actionTarget->hasAction(name);
 }

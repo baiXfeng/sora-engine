@@ -31,9 +31,7 @@ end
 function init(self)
     print("init")
 
-    local m = var[self]
-    --m.act = test
-    --m.act(self)
+    test(self)
 
     --[[self.node = self:add("assets/layouts/test.xml")
     if self.node ~= nil then
@@ -72,6 +70,7 @@ end
 
 function mouse_down(self, state)
     print("mouse_down", state.x, state.y)
+    test(self)
     return true
 end
 
