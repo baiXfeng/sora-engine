@@ -6,8 +6,13 @@
 #define SDL2_UI_LUA_APIS_H
 
 #include "lutok3/lutok3.h"
+#include "LuaBridge/LuaBridge.h"
 
-void openSoraLibs(lua_State* L);
+template<typename T>
+void registerMacro(lua_State* L, const char* name, T value) {
+    luabridge::push(L, value);
+    lua_setglobal(L, name);
+}
 
 void doBuffer(lua_State *L, const char* buffer, const size_t size, const char* name);
 int import(lua_State* L);

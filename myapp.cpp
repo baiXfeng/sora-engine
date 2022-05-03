@@ -11,26 +11,12 @@
 #include "common/xml_layout.h"
 #include "common/file-reader.h"
 #include "src/lua_apis.h"
-#include "src/lua_objects.h"
 #include "lutok3/lutok3.h"
-#include <unistd.h>
 #include "LuaBridge/LuaBridge.h"
 #include "src/lua_audio.h"
 #include "src/story-script.hpp"
-
-class Test {
-public:
-    void print() {
-        printf("hello world.\n");
-    }
-    void testTable(luabridge::LuaRef table) {
-        //printf("%s\n", lua_typename(L, -1));
-        //auto table = luabridge::LuaRef::fromStack(L, -1);
-        float x = table["x"].cast<float>();
-        float y = table["y"].cast<float>();
-        printf("x = %f, y = %f\n", x, y);
-    }
-};
+#include "src/lua_widget.h"
+#include <unistd.h>
 
 class MyApp : public mge::Game::App {
     lua_State* _state;
@@ -131,6 +117,7 @@ public:
                 .addFunction("setClip", &mge::Widget::enableClip)
                 .addFunction("removeFromParent", &mge::Widget::removeFromParent)
                 .addFunction("parent", &mge::Widget::parent)
+                .addFunction("add", &widgetAddLayout)
             .endClass()
             .deriveClass<Node, mge::Widget>("Node")
                 .addConstructor<void(*)()>()
@@ -150,14 +137,18 @@ public:
                 .addFunction("color", &Mask::getColor)
             .endClass();
 
-        luabridge::getGlobalNamespace(_state)
-            .beginNamespace("user")
-                .beginClass<Test>("Test")
-                    .addConstructor<void(*)()>()
-                    .addFunction("print", &Test::print)
-                    .addFunction("testTable", &Test::testTable)
-                .endClass()
-            .endNamespace();
+        registerMacro(_state, "BUTTON_UP", (int)mge::GamePadListener::UP);
+        registerMacro(_state, "BUTTON_DOWN", (int)mge::GamePadListener::DOWN);
+        registerMacro(_state, "BUTTON_LEFT", (int)mge::GamePadListener::LEFT);
+        registerMacro(_state, "BUTTON_RIGHT", (int)mge::GamePadListener::RIGHT);
+        registerMacro(_state, "BUTTON_L1", (int)mge::GamePadListener::L1);
+        registerMacro(_state, "BUTTON_R1", (int)mge::GamePadListener::R1);
+        registerMacro(_state, "BUTTON_SELECT", (int)mge::GamePadListener::SELECT);
+        registerMacro(_state, "BUTTON_START", (int)mge::GamePadListener::START);
+        registerMacro(_state, "BUTTON_A", (int)mge::GamePadListener::A);
+        registerMacro(_state, "BUTTON_B", (int)mge::GamePadListener::B);
+        registerMacro(_state, "BUTTON_X", (int)mge::GamePadListener::X);
+        registerMacro(_state, "BUTTON_Y", (int)mge::GamePadListener::Y);
 
         _game.uilayout().setLoader(mge::XmlLayout::LoaderPool(new ui::LoaderPool));
         _game.uilayout().getLoaderPool()->addLoader<ui::WidgetLoader>("Layout");
@@ -168,13 +159,6 @@ public:
         _game.uilayout().getLoaderPool()->addLoader<MaskLoader>("Mask");
 
         _game.set<lutok3::State>("lua_state", _state);
-        auto data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
-        doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
-
-        /*
-        openSoraLibs(_state);
-        _game.set<lutok3::State>("lua_state", _state);
-
         auto data = _game.uilayout().getFileReader()->getData("assets/startup.lua");
 
 #if defined(WIN32) or defined(__WIN32__)
@@ -188,17 +172,8 @@ public:
         if (data->empty()) {
             LOG_ERROR("assets/startup.lua not exist.\n");
         } else {
-            ELuna::doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
+            doBuffer(_state, (char*)data->data(), data->size(), data->name().c_str());
         }
-
-        // 设置窗口标题
-        lutok3::State s(_state);
-        if (auto type = s.getGlobal("WINDOW_TITLE"); type == lutok3::Type::String) {
-            std::string name = s.get();
-            SDL_SetWindowTitle(_game.window(), name.c_str());
-        }
-        s.pop();
-         */
     }
     void update(float delta) override {
         _game.screen().update(delta);

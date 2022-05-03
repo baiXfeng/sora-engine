@@ -7,50 +7,42 @@
 #include "common/xml_layout.h"
 #include "common/file-reader.h"
 #include "common/log.h"
-#include "lutok3/lutok3.h"
-#include "lua_objects.h"
 #include "lua_widget.h"
 #include "lua_audio.h"
-#include "story-script.hpp"
 
-template<typename T>
-static void registerMacro(lua_State* L, const char* name, T value) {
-    auto const top = lua_gettop(L);
-    {
-        luabridge::push(L, value);
-        lua_setglobal(L, name);
+inline void traceStack(lua_State* L, int n) {
+    lua_Debug ar;
+    if (lua_getstack(L, n, &ar)) {
+        lua_getinfo(L, "Sln", &ar);
+        if (ar.name) {
+            LOG_ERROR("\tstack[%d] -> line %d : %s()[%s : line %d]\n", n, ar.currentline, ar.name, ar.short_src, ar.linedefined);
+        } else {
+            LOG_ERROR("\tstack[%d] -> line %d : unknown[%s : line %d]\n", n, ar.currentline, ar.short_src, ar.linedefined);
+        }
+        traceStack(L, n+1);
     }
-    assert(top == lua_gettop(L));
 }
 
-void openSoraLibs(lua_State* L) {
-
-    // 按键值
-    registerMacro(L, "BUTTON_UP", (int)mge::GamePadListener::UP);
-    registerMacro(L, "BUTTON_DOWN", (int)mge::GamePadListener::DOWN);
-    registerMacro(L, "BUTTON_LEFT", (int)mge::GamePadListener::LEFT);
-    registerMacro(L, "BUTTON_RIGHT", (int)mge::GamePadListener::RIGHT);
-    registerMacro(L, "BUTTON_L1", (int)mge::GamePadListener::L1);
-    registerMacro(L, "BUTTON_R1", (int)mge::GamePadListener::R1);
-    registerMacro(L, "BUTTON_SELECT", (int)mge::GamePadListener::SELECT);
-    registerMacro(L, "BUTTON_START", (int)mge::GamePadListener::START);
-    registerMacro(L, "BUTTON_A", (int)mge::GamePadListener::A);
-    registerMacro(L, "BUTTON_B", (int)mge::GamePadListener::B);
-    registerMacro(L, "BUTTON_X", (int)mge::GamePadListener::X);
-    registerMacro(L, "BUTTON_Y", (int)mge::GamePadListener::Y);
+inline int error_log(lua_State *L) {
+    LOG_ERROR("error : %s\n", lua_tostring(L, -1));
+    traceStack(L, 0);
+    return 0;
 }
 
 void doBuffer(lua_State *L, const char* buffer, const size_t size, const char* name) {
     auto const top = lua_gettop(L);
     {
-        auto ret = luaL_loadbuffer(L, buffer, size, name);
-        if (ret) {
-            LOG_ERROR("error: %s\n", lua_tostring(L, -1));
-            lua_pop(L, 1);
-        } else if (ret = lua_pcall(L, 0, 0, 0); ret != 0) {
-            LOG_ERROR("error: %s\n", lua_tostring(L, -1));
+        lua_pushcclosure(L, error_log, 0);
+        int stackTop = lua_gettop(L);
+        if (luaL_loadbuffer(L, buffer, size, name) == 0) {
+            if (lua_pcall(L, 0, 0, stackTop)) {
+                lua_pop(L, 1);
+            }
+        } else {
+            LOG_ERROR("dobuffer error: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         }
+        lua_pop(L, 1);
     }
     assert(top == lua_gettop(L));
 }

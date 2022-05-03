@@ -46,6 +46,13 @@ namespace Lua {
         this->funcs.clear();
         this->funcs.resize(nameSize, L);
         this->func_names.resize(nameSize);
+
+        // 保留旧self引用
+        auto self = luabridge::LuaRef::getGlobal(L, "self");
+
+        this->getRef().push();
+        lua_setglobal(L, "self");
+
         {
             auto const top = lua_gettop(L);
             for (int i = 0; i < nameSize; ++i) {
@@ -81,5 +88,10 @@ namespace Lua {
             }
             assert(top == lua_gettop(L));
         }
+
+        // 还原旧self引用
+        self.push();
+        lua_setglobal(L, "self");
+
     }
 }
