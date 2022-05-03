@@ -89,15 +89,13 @@ end
 
 function on_assign(self, name, object)
     print("obj.lua assign", name, object)
-    local m = var[self]
-    m[name] = object
+    var[self][name] = object
     if name == "bg" then
         local size = self:size()
         object:setPosition({x=size.x*0.5, y=size.y*0.5})
         object:setAnchor({x=0.5, y=0.5})
     elseif name == "layout1" then
-        local o = var[object]
-        o.test(object)
+        var[object].test(object)
     end
 end
 
