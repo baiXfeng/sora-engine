@@ -4,8 +4,7 @@ local function test(self)
 end
 
 function init(self)
-    local m = var[self]
-    m.test = test
+    var[self].test = test
 end
 
 function on_assign(self, name, object)

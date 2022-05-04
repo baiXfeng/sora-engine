@@ -1,4 +1,6 @@
 
+local c = {}
+
 local function test(self)
     print("test function.")
     local act = action.Steps(
@@ -22,10 +24,9 @@ local function test(self)
     )
     rotateBg.name = "rotate"
 
-    local m = var[self]
-    m.bg:stopAction("rotate")
-    m.bg:runAction(rotateBg)
-    m.bg:setRotation(0)
+    c.bg:stopAction("rotate")
+    c.bg:runAction(rotateBg)
+    c.bg:setRotation(0)
 end
 
 function init(self)
@@ -89,7 +90,7 @@ end
 
 function on_assign(self, name, object)
     print("obj.lua assign", name, object)
-    var[self][name] = object
+    c[name] = object
     if name == "bg" then
         local size = self:size()
         object:setPosition({x=size.x*0.5, y=size.y*0.5})
