@@ -99,6 +99,7 @@ public:
                 .addConstructor<void(*)()>()
                 .addFunction("runAction", &widgetRunAction)
                 .addFunction("stopAction", &widgetStopAction)
+                .addFunction("stopAllActions", &mge::Widget::stopAllActions)
                 .addFunction("hasAction", &widgetHasAction)
                 .addFunction("setPosition", &widgetSetPosition)
                 .addFunction("position", std::move(widgetGetPosition))
