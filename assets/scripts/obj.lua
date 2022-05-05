@@ -3,6 +3,31 @@ local c = {}
 
 local function test(self)
     print("test function.")
+
+    local steps = action.Steps(
+            action.FadeBy(-255, 1.0),
+            action.FadeBy(255, 1.0)
+    )
+    local act = action.Repeat(steps, 0)
+    act.name = "fade"
+
+    self:stopAction("fade")
+    --self:runAction(act)
+    self:setOpacity(255)
+
+    local rotate = action.Repeat(action.RotationBy(360, 3.0))
+    rotate.name = "rotate"
+
+    self:stopAction("rotate")
+    self:runAction(rotate)
+    self:setRotation(0)
+
+    self:setPosition({x=480, y=272})
+    self:setAnchor({x=0.5, y=0.5})
+    --self:setRenderTarget(true)
+
+    return
+    --[[
     local act = action.Steps(
             action.Blink(10, 1.5),
             action.Callback(function()
@@ -27,6 +52,7 @@ local function test(self)
     c.bg:stopAction("rotate")
     c.bg:runAction(rotateBg)
     c.bg:setRotation(0)
+    ]]--
 end
 
 function init(self)

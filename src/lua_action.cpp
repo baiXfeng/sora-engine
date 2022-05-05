@@ -20,6 +20,8 @@ mge::Action::Ptr newMoveTo(mge::Widget* target, luabridge::LuaRef action);
 mge::Action::Ptr newMoveBy(mge::Widget* target, luabridge::LuaRef action);
 mge::Action::Ptr newRotationTo(mge::Widget* target, luabridge::LuaRef action);
 mge::Action::Ptr newRotationBy(mge::Widget* target, luabridge::LuaRef action);
+mge::Action::Ptr newFadeTo(mge::Widget* target, luabridge::LuaRef action);
+mge::Action::Ptr newFadeBy(mge::Widget* target, luabridge::LuaRef action);
 mge::Action::Ptr newBlink(mge::Widget* target, luabridge::LuaRef action);
 
 static std::map<std::string, std::function<mge::Action::Ptr(mge::Widget*, luabridge::LuaRef action)>> LuaActionBuilder = {
@@ -33,6 +35,8 @@ static std::map<std::string, std::function<mge::Action::Ptr(mge::Widget*, luabri
         {"MoveBy", &newMoveBy},
         {"RotationTo", &newRotationTo},
         {"RotationBy", &newRotationBy},
+        {"FadeTo", &newFadeTo},
+        {"FadeBy", &newFadeBy},
         {"Blink", &newBlink},
 };
 
@@ -196,6 +200,18 @@ mge::Action::Ptr newRotationBy(mge::Widget* target, luabridge::LuaRef action) {
     auto duration = action["duration"].cast<float>();
     auto rotation = action["rotation"].cast<float>();
     return mge::Action::Ptr(new mge::RotationBy(target, rotation, duration));
+}
+
+mge::Action::Ptr newFadeTo(mge::Widget* target, luabridge::LuaRef action) {
+    auto duration = action["duration"].cast<float>();
+    auto opacity = action["opacity"].cast<unsigned char>();
+    return mge::Action::Ptr(new mge::FadeTo(target, opacity, duration));
+}
+
+mge::Action::Ptr newFadeBy(mge::Widget* target, luabridge::LuaRef action) {
+    auto duration = action["duration"].cast<float>();
+    auto opacity = action["opacity"].cast<unsigned char>();
+    return mge::Action::Ptr(new mge::FadeBy(target, opacity, duration));
 }
 
 mge::Action::Ptr newBlink(mge::Widget* target, luabridge::LuaRef action) {

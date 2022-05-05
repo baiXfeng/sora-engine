@@ -42,6 +42,7 @@ protected:
 
 class Action;
 class BaseActionExecuter;
+class RenderCopyEx;
 class Widget : public WidgetSignal, public GamePadListener, public Event::Listener {
 public:
     typedef std::shared_ptr<Widget> WidgetPtr;
@@ -53,6 +54,8 @@ public:
         ON_ENTER = 0xABEF0001,
         ON_EXIT,
     };
+    typedef RenderCopyEx Render;
+    typedef std::shared_ptr<Render> RenderPtr;
 public:
     template<typename T, typename... Args>
     static Ptr New(Args const&... args) {
@@ -76,6 +79,7 @@ public:
 public:
     void enableUpdate(bool update);
     void enableClip(bool clip);
+    void enableRenderTarget(bool e, bool force);
     void setVisible(bool visible);
     void performLayout();
 public:
@@ -103,6 +107,7 @@ protected:
     virtual void onChildrenDraw(SDL_Renderer* renderer);
     virtual void onDirty() {}
     virtual void onVisible(bool visible) {}
+    void drawRenderTarget(SDL_Renderer* renderer);
 protected:
     virtual void enter();
     virtual void exit();
@@ -166,6 +171,7 @@ protected:
     bool _visible;
     bool _update;
     bool _clip;
+    bool _renderTarget;
     bool _touchEnable;
     bool _pause_action_when_hidden;
     bool _dirty;
@@ -182,6 +188,7 @@ protected:
     std::string _name;
     WidgetArray _children;
     ActionExecuterPtr _action;
+    RenderPtr _render;
     static std::vector<SDL_Rect> _clipStack;
 };
 

@@ -65,6 +65,7 @@ _userdata(nullptr),
 _visible(true),
 _update(false),
 _clip(false),
+_renderTarget(false),
 _touchEnable(true),
 _pause_action_when_hidden(false),
 _dirty(true),
@@ -136,6 +137,32 @@ void Widget::enableUpdate(bool update) {
 
 void Widget::enableClip(bool clip) {
     _clip = clip;
+}
+
+void Widget::enableRenderTarget(bool e, bool force) {
+    if (e) {
+        if (_render != nullptr and !force) {
+            return;
+        }
+        _render = std::make_shared<RenderCopyEx>();
+        auto const& size = this->size();
+        assert(size.x > 0 and size.y > 0 and "Widget::enableRenderTarget error.");
+        auto texture = SDL_CreateTexture(
+                _game.renderer(),
+                SDL_PIXELFORMAT_RGBA8888,
+                SDL_TEXTUREACCESS_TARGET,
+                size.x,
+                size.y
+        );
+        if (texture) {
+            //some problem on psvita
+            //SDL_SetTextureScaleMode(texture, SDL_ScaleModeLinear);
+        }
+        _render->setTexture(Texture::Ptr(new Texture(texture)));
+    } else {
+        _render = nullptr;
+    }
+    _renderTarget = e;
 }
 
 void Widget::setVisible(bool visible) {
@@ -252,19 +279,70 @@ void Widget::draw(SDL_Renderer* renderer) {
         return;
     }
     if (_clip) {
-        this->push_clip({
-            int(_global_position.x),
-            int(_global_position.y),
-            int(_global_size.x),
-            int(_global_size.y),
-        });
-        this->onDraw(renderer);
-        this->onChildrenDraw(renderer);
+        if (_renderTarget) {
+            this->push_clip({
+                int(0),
+                int(0),
+                int(_global_size.x),
+                int(_global_size.y),
+            });
+            drawRenderTarget(renderer);
+        } else {
+            this->push_clip({
+                int(_global_position.x),
+                int(_global_position.y),
+                int(_global_size.x),
+                int(_global_size.y),
+            });
+            this->onDraw(renderer);
+            this->onChildrenDraw(renderer);
+        }
         this->pop_clip();
     } else {
-        this->onDraw(renderer);
-        this->onChildrenDraw(renderer);
+        if (_renderTarget) {
+            drawRenderTarget(renderer);
+        } else {
+            this->onDraw(renderer);
+            this->onChildrenDraw(renderer);
+        }
     }
+}
+
+void Widget::drawRenderTarget(SDL_Renderer* renderer) {
+
+    if (not _visible) {
+        return;
+    }
+
+    auto scale = _scale;
+    auto anchor = _anchor;
+    auto position = _position;
+    auto parent = _parent;
+    this->_scale = {1.0f, 1.0f};
+    this->_anchor = {0.0f, 0.0f};
+    this->_position = {0.0f, 0.0f};
+    this->_parent = nullptr;
+    this->modifyLayout();
+
+    auto render_target = SDL_GetRenderTarget(renderer);
+    SDL_SetRenderTarget(renderer, _render->texture()->data());
+    SDL_RenderClear(renderer);
+    this->onDraw(renderer);
+    this->onChildrenDraw(renderer);
+    SDL_SetRenderTarget(renderer, render_target);
+
+    _parent = parent;
+    _position = position;
+    _anchor = anchor;
+    _scale = scale;
+    this->modifyLayout();
+
+    _render->setAnchor(_anchor);
+    _render->setScale(_scale);
+    _render->setSize(_size.to<int>());
+    _render->setOpacity(_opacity);
+    _render->setAngle(_rotation);
+    _render->draw(renderer, _position.to<int>());
 }
 
 void Widget::onChildrenDraw(SDL_Renderer* renderer) {

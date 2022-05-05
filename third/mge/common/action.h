@@ -259,6 +259,32 @@ private:
     float _distance;
 };
 
+class FadeTo : public Action {
+public:
+    FadeTo(Widget* target, unsigned char opacity, float duration);
+protected:
+    State Step(float dt) override;
+    void Reset() override;
+    State onStep(float dt);
+protected:
+    bool _first;
+    unsigned char _endValue;
+    Widget* _target;
+    float _step;
+    float _value;
+    float _ticks;
+    float _duration;
+};
+
+class FadeBy : public FadeTo {
+public:
+    FadeBy(Widget* target, unsigned char opacity, float duration);
+protected:
+    State Step(float dt) override;
+protected:
+    unsigned char _valueBy;
+};
+
 class Blink : public Action {
 public:
     Blink(Widget* target, int times, float duration);

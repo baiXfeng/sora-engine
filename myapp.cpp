@@ -115,6 +115,7 @@ public:
                 .addFunction("setVisible", &mge::Widget::setVisible)
                 .addFunction("visible", &mge::Widget::visible)
                 .addFunction("setClip", &mge::Widget::enableClip)
+                .addFunction("setRenderTarget", &mge::Widget::enableRenderTarget)
                 .addFunction("removeFromParent", &mge::Widget::removeFromParent)
                 .addFunction("parent", &mge::Widget::parent)
                 .addFunction("add", &widgetAddLayout)

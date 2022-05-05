@@ -9,6 +9,9 @@ local _action = {
     end,
 
     Repeat = function(act, repeatCount)
+        if repeatCount == nil then
+            repeatCount = 0
+        end
         return {
             type = "Repeat",
             action = act,
@@ -75,6 +78,22 @@ local _action = {
         return {
             type = "RotationBy",
             rotation = rotation,    -- float
+            duration = duration,    -- float
+        }
+    end,
+
+    FadeTo = function(opacity, duration)
+        return {
+            type = "FadeTo",
+            opacity = opacity,      -- int 0-255
+            duration = duration,    -- float
+        }
+    end,
+
+    FadeBy = function(opacity, duration)
+        return {
+            type = "FadeBy",
+            opacity = opacity,      -- int
             duration = duration,    -- float
         }
     end,
